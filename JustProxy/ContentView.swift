@@ -11,6 +11,7 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var model = ProxyModel()
     @State private var page = Page.proxy
+    @State private var showingPrivacy = false
 
     private var palette: ProxyPalette { ProxyPalette(dark: colorScheme == .dark) }
 
@@ -49,6 +50,9 @@ struct ContentView: View {
         .task(id: model.isListeningOnCellular) {
             if model.isListeningOnCellular { await model.watchNetworks() }
         }
+        .sheet(isPresented: $showingPrivacy) {
+            PrivacyView(palette: palette)
+        }
     }
 
     private var header: some View {
@@ -68,6 +72,17 @@ struct ContentView: View {
                     .foregroundStyle(palette.secondary)
             }
             Spacer(minLength: 0)
+            Button {
+                showingPrivacy = true
+            } label: {
+                Image(systemName: "questionmark.circle")
+                    .font(.system(size: 21, weight: .regular))
+                    .foregroundStyle(palette.secondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("隐私说明")
         }
         .padding(.horizontal, 22)
         .padding(.top, 16)
