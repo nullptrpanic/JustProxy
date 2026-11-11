@@ -1,6 +1,8 @@
 .*
 !.gitignore
 AGENTS.md
+# Local App Store Connect API credentials
+/.apikey/
 /docs/**/plan/
 /docs/**/plans/
 
