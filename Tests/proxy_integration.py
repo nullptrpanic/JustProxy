@@ -31,17 +31,21 @@ def receive_all(sock):
 
 class ProxyIntegrationTests(unittest.TestCase):
     binary = None
+    family = socket.AF_INET
+    host = "127.0.0.1"
+    authority_host = "127.0.0.1"
+    arguments = []
 
     def setUp(self):
-        self.origin = socket.socket()
+        self.origin = socket.socket(self.family)
         self.addCleanup(self.origin.close)
-        self.origin.bind(("127.0.0.1", 0))
+        self.origin.bind((self.host, 0))
         self.origin.listen(1)
         self.origin.settimeout(4)
-        self.target = f"127.0.0.1:{self.origin.getsockname()[1]}".encode()
+        self.target = f"{self.authority_host}:{self.origin.getsockname()[1]}".encode()
 
         self.proxy = subprocess.Popen(
-            [self.binary], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True
+            [self.binary, *self.arguments], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True
         )
         self.addCleanup(self.cleanup_proxy)
         ready = self.proxy_line()
@@ -61,7 +65,7 @@ class ProxyIntegrationTests(unittest.TestCase):
         self.proxy.stdout.close()
 
     def client(self):
-        connection = socket.create_connection(("127.0.0.1", self.port), timeout=4)
+        connection = socket.create_connection((self.host, self.port), timeout=4)
         self.addCleanup(connection.close)
         return connection
 
@@ -235,7 +239,7 @@ class ProxyIntegrationTests(unittest.TestCase):
     def guide_request(self, method="GET", target="/", headers=None, body=b""):
         client = self.client()
         if headers is None:
-            headers = f"Host: 127.0.0.1:{self.port}\r\n"
+            headers = f"Host: {self.authority_host}:{self.port}\r\n"
         client.sendall(f"{method} {target} HTTP/1.1\r\n{headers}\r\n".encode() + body)
         head, content = receive_all(client).split(b"\r\n\r\n", 1)
         lines = head.decode().split("\r\n")
@@ -249,7 +253,7 @@ class ProxyIntegrationTests(unittest.TestCase):
         self.assertEqual(int(headers["Content-Length"]), len(content))
         self.assertEqual(headers["Cache-Control"], "no-store")
         self.assertEqual(headers["Connection"], "close")
-        self.assertIn(f"127.0.0.1:{self.port}".encode(), content)
+        self.assertIn(f"{self.authority_host}:{self.port}".encode(), content)
         self.assertIn("服务器地址".encode(), content)
         self.assertNotIn(b"192.168.1.23", content)
         self.assertNotIn(b"{{", content)
@@ -257,10 +261,10 @@ class ProxyIntegrationTests(unittest.TestCase):
 
     def test_absolute_self_request_also_serves_the_guide_without_reflecting_host(self):
         status, _, content = self.guide_request(
-            target=f"http://127.0.0.1:{self.port}/?from=browser",
+            target=f"http://{self.authority_host}:{self.port}/?from=browser",
             headers="Host: attacker.invalid\r\n")
         self.assertEqual(status, "HTTP/1.1 200 OK")
-        self.assertIn(f"127.0.0.1:{self.port}".encode(), content)
+        self.assertIn(f"{self.authority_host}:{self.port}".encode(), content)
         self.assertNotIn(b"attacker.invalid", content)
 
     def test_guide_head_returns_get_length_without_body(self):
@@ -280,14 +284,14 @@ class ProxyIntegrationTests(unittest.TestCase):
         self.assertEqual(self.stop_proxy(), "STOPPED 0 0 0 -")
 
     def test_guide_does_not_accept_invalid_hosts_bodies_or_a_self_tunnel(self):
-        local = f"Host: 127.0.0.1:{self.port}\r\n"
+        local = f"Host: {self.authority_host}:{self.port}\r\n"
         cases = [
             ("GET", "/", "", b""),
             ("GET", "/", "Host: other.invalid\r\n", b""),
             ("GET", "/", local + local, b""),
             ("GET", "/", local + "Content-Length: 1\r\n", b"x"),
             ("GET", "/", local + "Content-Length: 0\r\nTransfer-Encoding: chunked\r\n", b"0\r\n\r\n"),
-            ("CONNECT", f"127.0.0.1:{self.port}", local, b""),
+            ("CONNECT", f"{self.authority_host}:{self.port}", local, b""),
         ]
         for method, target, headers, body in cases:
             with self.subTest(method=method, target=target, headers=headers):
@@ -297,11 +301,40 @@ class ProxyIntegrationTests(unittest.TestCase):
     def test_external_absolute_target_is_not_replaced_by_guide_for_local_host(self):
         client = self.client()
         client.sendall(b"GET http://" + self.target + b"/ HTTP/1.1\r\n"
-                       + f"Host: 127.0.0.1:{self.port}\r\n\r\n".encode())
+                       + f"Host: {self.authority_host}:{self.port}\r\n\r\n".encode())
         upstream = self.upstream()
         self.assertIn(b"Host: " + self.target + b"\r\n", receive_until(upstream, b"\r\n\r\n"))
         upstream.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 6\r\n\r\norigin")
         self.assertTrue(receive_all(client).endswith(b"\r\n\r\norigin"))
+
+
+class IPv6ProxyIntegrationTests(ProxyIntegrationTests):
+    family = socket.AF_INET6
+    host = "::1"
+    authority_host = "[::1]"
+    arguments = ["--ipv6"]
+
+    def test_expanded_ipv6_host_matches_the_listener_without_a_self_connection(self):
+        status, _, content = self.guide_request(headers=f"Host: [0:0:0:0:0:0:0:1]:{self.port}\r\n")
+        self.assertEqual(status, "HTTP/1.1 200 OK")
+        self.assertIn(f"[::1]:{self.port}".encode(), content)
+        self.assertEqual(self.stop_proxy(), "STOPPED 0 0 0 -")
+
+    def test_http_10_guide_without_host_uses_a_bracketed_ipv6_endpoint(self):
+        client = self.client()
+        client.sendall(b"GET / HTTP/1.0\r\n\r\n")
+        response = receive_all(client)
+        self.assertTrue(response.startswith(b"HTTP/1.1 200 OK\r\n"), response[:100])
+        self.assertIn(f"[::1]:{self.port}".encode(), response)
+
+    def test_ipv6_listener_forwards_hostname_targets(self):
+        client = self.client()
+        target = f"localhost:{self.origin.getsockname()[1]}".encode()
+        client.sendall(b"GET http://" + target + b"/ HTTP/1.1\r\nHost: " + target + b"\r\n\r\n")
+        upstream = self.upstream()
+        self.assertIn(b"Host: " + target + b"\r\n", receive_until(upstream, b"\r\n\r\n"))
+        upstream.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok")
+        self.assertTrue(receive_all(client).endswith(b"\r\n\r\nok"))
 
 
 class HTTPBodyTests(unittest.TestCase):
@@ -373,6 +406,20 @@ class InterfaceTypeTests(unittest.TestCase):
 
 
 class ListenerAddressTests(unittest.TestCase):
+    def test_ipv6_only_networks_keep_interface_priority_and_exclude_vpn_and_unusable_addresses(self):
+        choices = subprocess.check_output(
+            [ProxyIntegrationTests.binary, "--ipv6-selection"], text=True, timeout=5
+        ).splitlines()
+        self.assertEqual(choices, [
+            "2001:db8:1::2,2001:db8:2::2", "[2001:db8:1::2]:8080",
+            "192.168.42.19,2001:db8:2::2", "192.168.42.19:8080",
+            "2001:db8:1::2", "[2001:db8:1::2]:8080",
+            "169.254.10.2", "169.254.10.2:8080",
+            "fd00:1::1,2001:db8:1::2,2001:db8:2::2", "[fd00:1::1]:8080",
+            "2001:db8:2::2", "[2001:db8:2::2]:8080",
+            "", "-",
+        ])
+
     def test_automatic_listener_prefers_hotspot_then_wifi_then_cellular(self):
         addresses = subprocess.check_output(
             [ProxyIntegrationTests.binary, "--listener-addresses"], text=True, timeout=5
@@ -424,6 +471,7 @@ if __name__ == "__main__":
         body_binary = Path(temp) / "HTTPBodyHarness"
         subprocess.run(["xcrun", "swiftc", "-parse-as-library",
                         root / "JustProxy" / "Proxy" / "HTTPMessage.swift",
+                        root / "JustProxy" / "Proxy" / "LocalAddress.swift",
                         root / "Tests" / "HTTPBodyHarness.swift", "-o", body_binary], check=True)
         HTTPBodyTests.binary = body_binary
         unittest.main(verbosity=2)

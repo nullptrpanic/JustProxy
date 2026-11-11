@@ -213,7 +213,7 @@ button, summary, a { cursor: pointer; }
         </div>
         <div class="jp-help-copy-fallback" hidden>
           <label for="jp-help-copy-value">请选择并复制地址</label>
-          <input id="jp-help-copy-value" readonly value="{{HOST}}:{{PORT}}" aria-label="可手动复制的代理地址">
+          <input id="jp-help-copy-value" readonly value="{{ENDPOINT}}" aria-label="可手动复制的代理地址">
         </div>
         <span class="jp-help-live" aria-live="polite"></span>
       </section>
@@ -365,7 +365,7 @@ button, summary, a { cursor: pointer; }
   const live = root.querySelector('.jp-help-live');
   let copyTimer;
   copyButton.addEventListener('click', async () => {
-    const address = '{{HOST}}:{{PORT}}';
+    const address = '{{ENDPOINT}}';
     let copied = false;
     try {
       if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(address); copied = true; }

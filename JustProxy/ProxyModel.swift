@@ -11,7 +11,7 @@ final class ProxyModel {
         let listener: ListenerAddress
         let port: UInt16
 
-        var text: String { "\(listener.local.address):\(port)" }
+        var text: String { "\(listener.local.address.httpAuthorityHost):\(port)" }
     }
 
     enum State: Equatable {
@@ -95,10 +95,10 @@ final class ProxyModel {
     }
 
     func refreshNetworks() {
-        let local = LocalIPv4.addresses()
+        let local = LocalAddress.addresses()
         let cellularInterface = cellularMonitor.currentPath.availableInterfaces.first { $0.type == .cellular }?.name
         let snapshot = ListenerNetworks(
-            local: local, wifiInterfaces: LocalIPv4.wifiInterfaces(in: local), cellularInterface: cellularInterface,
+            local: local, wifiInterfaces: LocalAddress.wifiInterfaces(in: local), cellularInterface: cellularInterface,
             dataServiceID: telephony.dataServiceIdentifier,
             cellularGenerations: (telephony.serviceCurrentRadioAccessTechnology ?? [:]).mapValues(Self.generation)
         )

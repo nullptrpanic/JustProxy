@@ -366,7 +366,7 @@ private struct ProxyHomeView: View {
             Text(address)
                 .font(.body.monospaced().weight(.semibold))
                 .tracking(-0.5)
-                .lineLimit(1)
+                .lineLimit(2)
                 .minimumScaleFactor(0.75)
         }
     }

@@ -23,7 +23,7 @@ final class ProxyServer: @unchecked Sendable {
         case stopped(ProxyTraffic, failure: String?)
     }
 
-    private let address: IPv4Address
+    private let address: NWEndpoint.Host
     private let interface: String?
     private let port: UInt16
     private let report: @Sendable (Event) -> Void
@@ -35,7 +35,7 @@ final class ProxyServer: @unchecked Sendable {
     private var trafficChanged = false
     private var stopped = false
 
-    init(address: IPv4Address, interface: String? = nil, port: UInt16, report: @escaping @Sendable (Event) -> Void) {
+    init(address: NWEndpoint.Host, interface: String? = nil, port: UInt16, report: @escaping @Sendable (Event) -> Void) {
         self.address = address
         self.interface = interface
         self.port = port
@@ -70,9 +70,10 @@ final class ProxyServer: @unchecked Sendable {
 
     private func listen() {
         guard !stopped, listener == nil, let port = NWEndpoint.Port(rawValue: port) else { return }
-        let listenAddress: IPv4Address
+        let listenAddress: NWEndpoint.Host
         if let interface {
-            guard addressIsAssigned, let scopedAddress = IPv4Address("\(address)%\(interface)") else {
+            let scopedAddress = NWEndpoint.Host("\(address)%\(interface)")
+            guard addressIsAssigned, scopedAddress.interface?.name == interface else {
                 finish(failure: "当前监听地址已失效。")
                 return
             }
@@ -83,7 +84,7 @@ final class ProxyServer: @unchecked Sendable {
         do {
             let parameters = NWParameters.tcp
             parameters.requiredInterface = listenAddress.interface
-            parameters.requiredLocalEndpoint = .hostPort(host: .ipv4(listenAddress), port: port)
+            parameters.requiredLocalEndpoint = .hostPort(host: listenAddress, port: port)
             let listener = try NWListener(using: parameters)
             self.listener = listener
             listener.newConnectionHandler = { [weak self] client in
@@ -179,7 +180,7 @@ final class ProxyServer: @unchecked Sendable {
     }
 
     private var addressIsAssigned: Bool {
-        LocalIPv4.addresses().contains { $0.address == address && (interface == nil || $0.interface == interface) }
+        LocalAddress.addresses().contains { $0.address == address && (interface == nil || $0.interface == interface) }
     }
 
     private func finish(failure: String?) {

@@ -90,7 +90,7 @@ struct ListenerPickerView: View {
                 .padding(.horizontal, 8)
             option(
                 title: model.cellularTitle(networks.dataServiceID),
-                detail: dataAddress.map { "\($0.local.address)" } ?? "当前暂无可用的 IPv4 地址",
+                detail: dataAddress.map { "\($0.local.address)" } ?? "当前暂无可用的 IP 地址",
                 icon: ListenerAddress.Kind.cellular.icon, listener: dataAddress,
                 badge: "数据卡", selectable: dataAddress != nil
             )

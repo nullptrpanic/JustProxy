@@ -22,11 +22,13 @@ The app and public support pages currently use Simplified Chinese. Repository do
 1. Connect the iPhone and client to a network that allows them to communicate.
 2. Open JustProxy, choose a listening address, and tap the power control.
 3. Configure the client's HTTP proxy with the displayed IP address and port `8080`.
-4. Open `http://<displayed-ip>:8080/` in a browser for setup instructions, or use a proxy-aware client:
+4. Add `http://` before the copied endpoint to open the setup guide, or use a proxy-aware client:
 
    ```sh
    curl --proxy 'http://<displayed-ip>:8080' https://example.com/
    ```
+
+   IPv6 endpoints include brackets, for example `http://[2001:db8::2]:8080/`. When the client has separate server and port fields, enter the IP address without brackets and port `8080`.
 
 5. Tap the power control again to stop. Disable the client's manual proxy setting when finished.
 
@@ -34,7 +36,7 @@ The app and public support pages currently use Simplified Chinese. Repository do
 
 - JustProxy provides an explicit HTTP proxy. It does not automatically intercept hotspot traffic, create a VPN, or configure a system-wide VPN.
 - Outbound connections follow iOS routing. Choosing a listening address selects where clients connect; it does not choose an outbound VPN or guarantee that another VPN carries the traffic.
-- The listener uses IPv4. A listed cellular address may be unreachable from other devices because of carrier routing or network isolation.
+- The listener supports IPv4 and IPv6. It prefers configured IPv4 on each interface, then IPv6, then self-assigned IPv4 (`169.254.*`). IPv6 link-local addresses are not advertised because clients require their own interface scope. A listed cellular address may be unreachable from other devices because of carrier routing or network isolation.
 - The proxy does not implement client authentication. Use it only with trusted clients on trusted networks.
 - Background execution is best effort. Switching apps does not explicitly stop the listener, but iOS may suspend or terminate the app. Keep JustProxy in the foreground for sustained use.
 - HTTPS CONNECT relays tunnel bytes without installing certificates or decrypting HTTPS.

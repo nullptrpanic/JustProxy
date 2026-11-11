@@ -7,7 +7,7 @@ enum ConnectionGuide {
         return try? String(contentsOf: url, encoding: .utf8)
     }()
 
-    static func response(to request: HTTPProxyRequest, address: IPv4Address, port: UInt16) -> Data {
+    static func response(to request: HTTPProxyRequest, address: NWEndpoint.Host, port: UInt16) -> Data {
         let status: String
         let content: String
         let type: String
@@ -26,6 +26,7 @@ enum ConnectionGuide {
             status = "200 OK"
             let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
             content = template
+                .replacingOccurrences(of: "{{ENDPOINT}}", with: "\(address.httpAuthorityHost):\(port)")
                 .replacingOccurrences(of: "{{HOST}}", with: String(describing: address))
                 .replacingOccurrences(of: "{{PORT}}", with: String(port))
                 .replacingOccurrences(of: "{{VERSION}}", with: version)

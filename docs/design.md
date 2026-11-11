@@ -14,7 +14,7 @@ Clients must configure the proxy themselves. Personal Hotspot is optional. JustP
 | --- | --- |
 | `JustProxyApp` and SwiftUI views | App lifecycle integration, proxy controls, network picker, traffic, and privacy presentation |
 | `ProxyModel` | Main-actor observable state, selected listener, session identity, and server event handling |
-| `LocalIPv4` and `InterfaceTypes.h` | Enumerate active IPv4 interfaces and identify infrastructure Wi-Fi interfaces |
+| `LocalAddress` and `InterfaceTypes.h` | Enumerate active IPv4/IPv6 interfaces and identify infrastructure Wi-Fi interfaces |
 | `ListenerNetworks` | Classify and order supported listener choices and resolve a selected address |
 | `ProxyServer` | Own the listener, accepted peers, session counters, and periodic state validation on a serial queue |
 | `ProxyConnection` | Own one client/upstream pair and handle forwarding, completion, half-close, and idle expiry |
@@ -26,7 +26,9 @@ Clients must configure the proxy themselves. Personal Hotspot is optional. JustP
 
 The model transitions through `off`, `starting`, `running`, and `stopping`. A listener-ready event is required before showing the proxy as running. Each start creates a new session identity so delayed events from an older session cannot affect a new one.
 
-The server binds to the selected IPv4 address and interface on port `8080`. Automatic selection prefers a detected hotspot, then infrastructure Wi-Fi, then the active cellular interface. Hotspot detection uses known interface/address heuristics because there is no public Personal Hotspot interface type.
+The server binds to the selected IP address and interface on port `8080`, using `NWEndpoint.Host` for both address families. Automatic selection prefers a detected hotspot, then infrastructure Wi-Fi, then the active cellular interface. On each interface, configured IPv4 choices remain preferred, followed by IPv6 unicast and finally self-assigned IPv4 (`169.254.*`). Hotspot detection uses known interface/address heuristics because there is no public Personal Hotspot interface type.
+
+Unspecified, loopback, multicast, IPv4-mapped IPv6, and IPv6 link-local addresses are excluded from the picker. Link-local IPv6 would require a scope belonging to the client device, so the phone's interface name cannot be shared as a ready-to-use endpoint. IPv6 authorities use brackets around the address; separate server fields in the setup guide show the bare address. Local guide requests compare parsed addresses, including equivalent compressed and expanded IPv6 literals.
 
 The picker excludes loopback addresses and does not classify point-to-point VPN tunnels as Wi-Fi. It does not read SSIDs. Cellular metadata identifies the current data line and radio generation; standby lines do not provide independent listening endpoints.
 
@@ -71,6 +73,6 @@ Project documentation belongs in `docs/` and is written in English. Historical l
 
 ## Verification boundaries
 
-`python3 Tests/proxy_integration.py` compiles native harnesses and checks protocol behavior with real loopback sockets, along with listener-selection and background-task lifecycle cases. All generated files stay under `build/Tests/`.
+`python3 Tests/proxy_integration.py` compiles native harnesses and checks protocol behavior with real IPv4 and IPv6 loopback sockets, along with listener-selection and background-task lifecycle cases. All generated files stay under `build/Tests/`.
 
-Physical-device testing is still needed for carrier reachability, hotspot behavior, actual VPN routing, and iOS background suspension. Loopback tests do not establish those behaviors.
+Physical-device testing is still needed for DNS64/NAT64 Wi-Fi, carrier reachability, hotspot behavior, actual VPN routing, and iOS background suspension. Loopback tests do not establish those behaviors. Follow Apple's [IPv6-only network testing guidance](https://developer.apple.com/support/ipv6/) with cellular data disabled to verify the complete device path.

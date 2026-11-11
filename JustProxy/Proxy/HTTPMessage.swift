@@ -138,7 +138,7 @@ struct HTTPProxyRequest {
     let forwardHead: Data?
     let framing: HTTPBody.Framing
 
-    init(_ head: HTTPMessageHead, localEndpoint: (address: IPv4Address, port: UInt16)? = nil) throws {
+    init(_ head: HTTPMessageHead, localEndpoint: (address: NWEndpoint.Host, port: UInt16)? = nil) throws {
         let parts = head.start.split(separator: " ", omittingEmptySubsequences: false)
         guard parts.count == 3, !parts[0].isEmpty, parts[0].utf8.allSatisfy(isToken),
             parts[2] == "HTTP/1.1" || parts[2] == "HTTP/1.0"
@@ -170,7 +170,7 @@ struct HTTPProxyRequest {
             requestPath = "*"
         } else if originForm, let localEndpoint {
             guard !target.contains("#"), !target.contains("\\") else { throw HTTPMessageError.malformed }
-            authority = hosts.first ?? "\(localEndpoint.address):\(localEndpoint.port)"
+            authority = hosts.first ?? "\(localEndpoint.address.httpAuthorityHost):\(localEndpoint.port)"
             requestPath = target
         } else {
             guard target.prefix(7).lowercased() == "http://", !target.contains("#"), !target.contains("\\")
@@ -186,7 +186,7 @@ struct HTTPProxyRequest {
         }
         (host, port) = try Self.destination(authority, defaultPort: 80)
         if originForm {
-            guard let localEndpoint, IPv4Address(host) == localEndpoint.address, port == localEndpoint.port else {
+            guard let localEndpoint, NWEndpoint.Host(host) == localEndpoint.address, port == localEndpoint.port else {
                 throw HTTPMessageError.malformed
             }
         }
