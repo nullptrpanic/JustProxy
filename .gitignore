@@ -1,5 +1,10 @@
 .*
 !.gitignore
+!/.github/
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/pages.yml
 AGENTS.md
 # Local App Store Connect API credentials
 /.apikey/
