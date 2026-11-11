@@ -260,6 +260,14 @@ struct HTTPBody {
 
     mutating func consume(_ input: Data, eof: Bool) throws -> Data {
         if finished { return Data() }
+        if case .fixed(let remaining) = state {
+            let count = min(remaining, UInt64(input.count))
+            let left = remaining - count
+            if eof, left != 0 { throw HTTPMessageError.malformed }
+            state = left == 0 ? .finished : .fixed(left)
+            // Count streamed bytes without retaining consumed prefixes in a growing buffer.
+            return input.prefix(Int(count))
+        }
         if case .untilEOF = state {
             if eof { state = .finished }
             return input
@@ -271,16 +279,12 @@ struct HTTPBody {
             switch state {
             case .finished:
                 pending.removeAll()
-            case .fixed(let remaining), .chunkData(let remaining):
+            case .chunkData(let remaining):
                 let count = Int(min(remaining, UInt64(pending.count)))
                 output.append(pending.prefix(count))
                 pending.removeFirst(count)
                 let left = remaining - UInt64(count)
-                if case .fixed = state {
-                    state = left == 0 ? .finished : .fixed(left)
-                } else {
-                    state = left == 0 ? .chunkEnd : .chunkData(left)
-                }
+                state = left == 0 ? .chunkEnd : .chunkData(left)
             case .chunkSize:
                 guard let line = try takeLine() else { break parse }
                 let size = String(decoding: line.prefix { $0 != 59 }, as: UTF8.self)
@@ -314,7 +318,7 @@ struct HTTPBody {
                     output.append(line)
                 }
                 output.append(lineEnd)
-            case .untilEOF:
+            case .fixed, .untilEOF:
                 break parse
             }
         }

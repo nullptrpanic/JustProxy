@@ -58,6 +58,8 @@ final class ProxyConnection {
             guard let self else { return }
             switch state {
             case .ready:
+                // I/O completions must drain buffered bytes before closing an established connection.
+                self.client.stateUpdateHandler = nil
                 self.readHeader()
             case .failed, .cancelled:
                 self.finish()
@@ -130,6 +132,8 @@ final class ProxyConnection {
             guard let self, let destination, !self.finished, !self.closing else { return }
             switch state {
             case .ready where !self.upstreamReady:
+                // A terminal state can precede delivery of buffered data and the read-side EOF.
+                destination.stateUpdateHandler = nil
                 self.upstreamReady = true
                 self.lastActivity = .now()
                 self.connected(request)
@@ -229,9 +233,10 @@ final class ProxyConnection {
 
     private func read(from connection: NWConnection, completion: @escaping (Data, Bool) -> Void) {
         guard !finished, !closing else { return }
-        connection.receive(minimumIncompleteLength: 1, maximumLength: 32 * 1024) { [weak self] data, _, eof, error in
+        connection.receive(minimumIncompleteLength: 1, maximumLength: 128 * 1024) { [weak self] data, _, eof, error in
             guard let self, !self.finished, !self.closing else { return }
-            if error != nil {
+            // Network may deliver buffered content alongside an error. Forward it before the next read fails.
+            if error != nil, data?.isEmpty != false {
                 if connection === self.client { self.finish() } else { self.upstreamFailed() }
                 return
             }

@@ -1,6 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
 import select
 import shutil
 import socket
+import struct
 import subprocess
 import tempfile
 import unittest
@@ -134,6 +137,74 @@ class ProxyIntegrationTests(unittest.TestCase):
         self.assertEqual(response.split(b"\r\n\r\n", 1)[1], b"tunnel-response")
         self.assertEqual(self.stop_proxy(), "STOPPED 17 15 1 -")
 
+    def transfer_after_half_close(self, sender, receiver):
+        payload = bytes(range(256)) * (32 * 1024)
+
+        def send():
+            sender.sendall(payload)
+            sender.shutdown(socket.SHUT_WR)
+
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            sending = pool.submit(send)
+            received = receive_all(receiver)
+            sending.result(timeout=10)
+        self.assertEqual(len(received), len(payload))
+        self.assertEqual(hashlib.sha256(received).digest(), hashlib.sha256(payload).digest())
+        return len(payload)
+
+    def test_connect_drains_large_response_after_client_half_close(self):
+        client = self.client()
+        client.sendall(b"CONNECT " + self.target + b" HTTP/1.1\r\nHost: " + self.target
+                       + b"\r\n\r\nrequest")
+        client.shutdown(socket.SHUT_WR)
+        upstream = self.upstream()
+        self.assertEqual(receive_all(upstream), b"request")
+        self.assertEqual(receive_until(client, b"\r\n\r\n"),
+                         b"HTTP/1.1 200 Connection Established\r\n\r\n")
+        count = self.transfer_after_half_close(upstream, client)
+        self.assertEqual(self.stop_proxy(), f"STOPPED 7 {count} 1 -")
+
+    def test_connect_drains_large_upload_after_server_half_close(self):
+        client = self.client()
+        client.sendall(b"CONNECT " + self.target + b" HTTP/1.1\r\nHost: " + self.target + b"\r\n\r\n")
+        upstream = self.upstream()
+        upstream.sendall(b"reply")
+        upstream.shutdown(socket.SHUT_WR)
+        self.assertEqual(receive_all(client), b"HTTP/1.1 200 Connection Established\r\n\r\nreply")
+        count = self.transfer_after_half_close(client, upstream)
+        self.assertEqual(self.stop_proxy(), f"STOPPED {count} 5 1 -")
+
+    def test_connect_upstream_reset_closes_client_after_delivered_bytes(self):
+        client = self.client()
+        client.sendall(b"CONNECT " + self.target + b" HTTP/1.1\r\nHost: " + self.target + b"\r\n\r\n")
+        upstream = self.upstream()
+        self.assertEqual(receive_until(client, b"\r\n\r\n"),
+                         b"HTTP/1.1 200 Connection Established\r\n\r\n")
+        upstream.sendall(b"delivered")
+        self.assertEqual(receive_until(client, b"delivered"), b"delivered")
+        upstream.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+        upstream.close()
+        self.assertEqual(receive_all(client), b"")
+        self.assertEqual(self.stop_proxy(), "STOPPED 0 9 1 -")
+
+    def test_connect_client_reset_closes_upstream(self):
+        client = self.client()
+        client.sendall(b"CONNECT " + self.target + b" HTTP/1.1\r\nHost: " + self.target + b"\r\n\r\n")
+        upstream = self.upstream()
+        self.assertEqual(receive_until(client, b"\r\n\r\n"),
+                         b"HTTP/1.1 200 Connection Established\r\n\r\n")
+        client.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+        client.close()
+        self.assertEqual(receive_all(upstream), b"")
+        self.assertEqual(self.stop_proxy(), "STOPPED 0 0 1 -")
+
+    def test_upstream_connection_failure_returns_bad_gateway(self):
+        self.origin.close()
+        client = self.client()
+        client.sendall(b"GET http://" + self.target + b"/ HTTP/1.1\r\nHost: " + self.target + b"\r\n\r\n")
+        self.assertEqual(receive_all(client),
+                         b"HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+
     def test_rejects_conflicting_body_framing(self):
         client = self.client()
         client.sendall(b"POST http://" + self.target + b"/ HTTP/1.1\r\nHost: " + self.target
@@ -233,6 +304,27 @@ class ProxyIntegrationTests(unittest.TestCase):
         self.assertTrue(receive_all(client).endswith(b"\r\n\r\norigin"))
 
 
+class HTTPBodyTests(unittest.TestCase):
+    binary = None
+
+    def test_fixed_body_memory_stays_bounded_as_transfer_grows(self):
+        peaks = []
+        for mib in [1, 128]:
+            output = subprocess.check_output([self.binary, "stream", str(mib)], text=True, timeout=10).split()
+            self.assertEqual(output[:2], [str(mib * 1024 * 1024), "true"])
+            peaks.append(int(output[2]))
+        self.assertLess(peaks[1] - peaks[0], 32 * 1024 * 1024,
+                        "A streaming body must not retain memory proportional to its total size")
+
+    def test_fixed_body_preserves_fragments_and_excludes_pipelined_bytes(self):
+        output = subprocess.check_output([self.binary, "fragments"], text=True, timeout=5).splitlines()
+        self.assertEqual(output, ["0 false", "ab false", "cde true", "0 true"])
+
+    def test_fixed_body_rejects_early_eof(self):
+        output = subprocess.check_output([self.binary, "early-eof"], text=True, timeout=5).strip()
+        self.assertEqual(output, "malformed")
+
+
 class BackgroundExecutionTests(unittest.TestCase):
     binary = None
 
@@ -329,4 +421,9 @@ if __name__ == "__main__":
                         root / "JustProxy" / "BackgroundExecution.swift",
                         root / "Tests" / "BackgroundExecutionHarness.swift", "-o", background_binary], check=True)
         BackgroundExecutionTests.binary = background_binary
+        body_binary = Path(temp) / "HTTPBodyHarness"
+        subprocess.run(["xcrun", "swiftc", "-parse-as-library",
+                        root / "JustProxy" / "Proxy" / "HTTPMessage.swift",
+                        root / "Tests" / "HTTPBodyHarness.swift", "-o", body_binary], check=True)
+        HTTPBodyTests.binary = body_binary
         unittest.main(verbosity=2)
