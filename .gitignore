@@ -1,0 +1,13 @@
+.*
+!.gitignore
+AGENTS.md
+# Local App Store Connect API credentials
+/.apikey/
+/docs/**/plan/
+/docs/**/plans/
+
+# Local Xcode state and build output
+xcuserdata/
+*.xcuserstate
+/build/
+DerivedData/
