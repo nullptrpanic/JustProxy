@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="graphite" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#323944"/>
+      <stop offset="1" stop-color="#12161D"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#graphite)"/>
+  <circle cx="616" cy="512" r="170" fill="none" stroke="#8494AC" stroke-width="42"/>
+  <circle cx="408" cy="512" r="170" fill="none" stroke="#E3E9F2" stroke-width="42"/>
+</svg>

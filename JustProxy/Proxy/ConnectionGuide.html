@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>JustProxy · 连接指南</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2218%22%20fill%3D%22%23141b24%22%2F%3E%3Ccircle%20cx%3D%2226%22%20cy%3D%2232%22%20r%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23bdcce0%22%20stroke-width%3D%223%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%2232%22%20r%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%237d92aa%22%20stroke-width%3D%223%22%2F%3E%3C%2Fsvg%3E">
+<style>
+html { background: #0a0e15; color-scheme: dark; }
+body { margin: 0; }
+button, summary, a { cursor: pointer; }
+
+  #justproxy-connection-guide-responsive { width: 100%; background: transparent; }
+  #justproxy-connection-guide-responsive .jp-help-page {
+    --jp-help-bg: #0a0e15;
+    --jp-help-text: #e8edf5;
+    --jp-help-muted: #9aa6b8;
+    --jp-help-faint: #79879b;
+    --jp-help-accent: #acc8ef;
+    --jp-help-line: #242d3b;
+    --jp-help-radius: 18px;
+    --jp-help-glow: .10;
+    container: jp-help / inline-size;
+    width: 100%; max-width: 100%; margin: 0 auto;
+    color: var(--jp-help-text); color-scheme: dark;
+    background: radial-gradient(ellipse at 84% 0%, rgba(101,145,210,var(--jp-help-glow)), transparent 42%), var(--jp-help-bg);
+    border-radius: var(--jp-help-radius);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px; line-height: 1.65;
+  }
+  #justproxy-connection-guide-responsive .jp-help-page * { box-sizing: border-box; }
+  #justproxy-connection-guide-responsive .jp-help-page [hidden] { display: none !important; }
+  #justproxy-connection-guide-responsive .jp-help-page :is(h1,h2,h3,p,dl,dd,ol) { margin: 0; }
+  #justproxy-connection-guide-responsive .jp-help-page button,
+  #justproxy-connection-guide-responsive .jp-help-page input { font: inherit; }
+  #justproxy-connection-guide-responsive .jp-help-page button { -webkit-tap-highlight-color: transparent; }
+  #justproxy-connection-guide-responsive .jp-help-page button:focus-visible,
+  #justproxy-connection-guide-responsive .jp-help-page summary:focus-visible,
+  #justproxy-connection-guide-responsive .jp-help-page a:focus-visible { outline: 2px solid var(--jp-help-accent); outline-offset: 4px; }
+  #justproxy-connection-guide-responsive .jp-help-page svg { width: 16px; height: 16px; flex-shrink: 0; stroke-width: 1.65; }
+  #justproxy-connection-guide-responsive .jp-help-inner { padding: 32px 40px 25px; max-width: 800px; margin: 0 auto; }
+  #justproxy-connection-guide-responsive .jp-help-header { display: flex; align-items: center; min-height: 42px; }
+  #justproxy-connection-guide-responsive .jp-help-brand { display: flex; gap: 11px; align-items: center; }
+  #justproxy-connection-guide-responsive .jp-help-brand strong { display: block; font-size: 19px; font-weight: 650; line-height: 1.2; letter-spacing: -.6px; }
+  #justproxy-connection-guide-responsive .jp-help-brand div > span { display: block; font-size: 9px; color: var(--jp-help-faint); letter-spacing: 1.8px; margin-top: 5px; line-height: 1; }
+  #justproxy-connection-guide-responsive .jp-help-mark { position: relative; width: 40px; height: 40px; flex-shrink: 0; border-radius: 13px; background: linear-gradient(145deg,#242b34,#121720); border: 1px solid #3b4452; box-shadow: inset 0 1px 0 #434c5a33; }
+  #justproxy-connection-guide-responsive .jp-help-mark > span { position: absolute; width: 18px; height: 18px; border: 1.7px solid #b8c6d7; border-radius: 50%; top: 10px; left: 6px; }
+  #justproxy-connection-guide-responsive .jp-help-mark > span + span { left: 15px; border-color: #7f94ac; }
+  #justproxy-connection-guide-responsive .jp-help-intro { padding: 40px 0 27px; }
+  #justproxy-connection-guide-responsive .jp-help-status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #acb8c9; }
+  #justproxy-connection-guide-responsive .jp-help-status > span { width: 6px; height: 6px; border-radius: 50%; background: #56cf9e; box-shadow: 0 0 9px #56cf9e40; }
+  #justproxy-connection-guide-responsive .jp-help-intro h1 { margin-top: 13px; font-size: clamp(28px,5.4cqi,40px); font-weight: 600; line-height: 1.3; letter-spacing: -1.1px; }
+  #justproxy-connection-guide-responsive .jp-help-intro h1 > span { color: var(--jp-help-accent); }
+  #justproxy-connection-guide-responsive .jp-help-intro p { margin-top: 13px; color: var(--jp-help-muted); font-size: 14px; line-height: 1.8; }
+  #justproxy-connection-guide-responsive .jp-help-mobile-break { display: none; }
+  #justproxy-connection-guide-responsive .jp-help-address { position: relative; padding: 21px 24px 19px; border: 1px solid #344256; border-radius: var(--jp-help-radius); background: linear-gradient(117deg,#151e2b,#111822 76%); box-shadow: 0 10px 35px #0000001a, inset 0 1px 0 #b0c9ed0b; }
+  #justproxy-connection-guide-responsive .jp-help-address::before { content: ""; position: absolute; height: 1px; top: -1px; left: 9%; right: 9%; background: linear-gradient(90deg,transparent,#a6c6f080,transparent); }
+  #justproxy-connection-guide-responsive .jp-help-address-top { display: flex; justify-content: space-between; align-items: center; color: #bbc8da; font-size: 12px; }
+  #justproxy-connection-guide-responsive .jp-help-protocol { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 1px; font-size: 10px; padding: 2px 7px; color: var(--jp-help-accent); background: #9dbce513; border-radius: 5px; }
+  #justproxy-connection-guide-responsive .jp-help-values { display: grid; grid-template-columns: minmax(0,1fr) 116px; gap: 24px; padding: 22px 0 24px; }
+  #justproxy-connection-guide-responsive .jp-help-values dt { color: var(--jp-help-muted); font-size: 12px; margin-bottom: 6px; }
+  #justproxy-connection-guide-responsive .jp-help-values dd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; font-size: 29px; line-height: 1.4; font-weight: 500; letter-spacing: -.8px; user-select: all; overflow-wrap: anywhere; }
+  #justproxy-connection-guide-responsive .jp-help-values > div + div { border-left: 1px solid #344255; padding-left: 24px; }
+  #justproxy-connection-guide-responsive .jp-help-address-bottom { border-top: 1px solid #2b3748; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  #justproxy-connection-guide-responsive .jp-help-support { display: inline-flex; align-items: center; gap: 7px; color: #9dabc0; font-size: 12px; }
+  #justproxy-connection-guide-responsive .jp-help-support svg { width: 14px; height: 14px; }
+  #justproxy-connection-guide-responsive .jp-help-copy { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0; min-height: 40px; padding: 9px 14px; border: 1px solid #bbcee7; border-radius: 10px; background: #c3d4eb; color: #131f30; font-size: 12px; font-weight: 600; transition: background 130ms; }
+  #justproxy-connection-guide-responsive .jp-help-copy:hover { background: #d3e2f5; }
+  #justproxy-connection-guide-responsive .jp-help-copy svg { width: 14px; height: 14px; }
+  #justproxy-connection-guide-responsive .jp-help-copy-fallback { margin-top: 14px; }
+  #justproxy-connection-guide-responsive .jp-help-copy-fallback label { display: block; margin-bottom: 6px; color: var(--jp-help-muted); font-size: 12px; }
+  #justproxy-connection-guide-responsive .jp-help-copy-fallback input { width: 100%; background: #0b111b; border: 1px solid #43556e; border-radius: 8px; padding: 10px; color: var(--jp-help-text); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 16px; }
+  #justproxy-connection-guide-responsive .jp-help-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  #justproxy-connection-guide-responsive .jp-help-setup { margin-top: 34px; }
+  #justproxy-connection-guide-responsive .jp-help-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+  #justproxy-connection-guide-responsive .jp-help-page h2 { font-size: 16px; font-weight: 550; letter-spacing: -.3px; }
+  #justproxy-connection-guide-responsive .jp-help-section-heading > span { color: var(--jp-help-faint); font-size: 12px; }
+  #justproxy-connection-guide-responsive .jp-help-tabs { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 5px; padding: 5px; background: #111720; border: 1px solid #202a38; border-radius: 12px; }
+  #justproxy-connection-guide-responsive .jp-help-tabs button { display: block; padding: 9px 6px; min-height: 38px; background: transparent; border: 1px solid transparent; border-radius: 8px; color: #95a3b7; font-size: 12px; white-space: nowrap; }
+  #justproxy-connection-guide-responsive .jp-help-tabs button:hover { color: #e5edf9; background: #1b2534; }
+  #justproxy-connection-guide-responsive .jp-help-tabs button[aria-selected="true"] { color: #dce9ff; background: #253247; border-color: #3d506d; box-shadow: 0 1px 5px #00000025; }
+  #justproxy-connection-guide-responsive .jp-help-steps { padding: 24px 1px 0; }
+  #justproxy-connection-guide-responsive .jp-help-steps ol { padding: 0; list-style: none; display: grid; gap: 23px; }
+  #justproxy-connection-guide-responsive .jp-help-steps li { display: grid; grid-template-columns: 29px minmax(0,1fr); gap: 14px; position: relative; }
+  #justproxy-connection-guide-responsive .jp-help-step-number { width: 29px; height: 29px; display: grid; place-items: center; border: 1px solid #344155; border-radius: 50%; color: #a1b2c9; font-size: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; line-height: 1; }
+  #justproxy-connection-guide-responsive .jp-help-steps li:not(:last-child)::after { content: ""; position: absolute; top: 35px; bottom: -17px; width: 1px; left: 14px; background: #253044; }
+  #justproxy-connection-guide-responsive .jp-help-steps h3 { color: #dce5f2; font-size: 14px; font-weight: 500; padding-top: 2px; }
+  #justproxy-connection-guide-responsive .jp-help-steps li p { margin-top: 5px; color: var(--jp-help-muted); font-size: 13px; line-height: 1.8; }
+  #justproxy-connection-guide-responsive .jp-help-step-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 15px; padding-left: 43px; margin-top: 21px; color: var(--jp-help-faint); font-size: 11px; }
+  #justproxy-connection-guide-responsive .jp-help-source { display: inline-flex; align-items: center; gap: 4px; color: var(--jp-help-muted); text-decoration: none; }
+  #justproxy-connection-guide-responsive .jp-help-source:hover { color: var(--jp-help-accent); }
+  #justproxy-connection-guide-responsive .jp-help-source svg { width: 12px; height: 12px; }
+  #justproxy-connection-guide-responsive .jp-help-confirm { display: flex; align-items: flex-start; gap: 11px; margin-top: 22px; padding: 16px 17px; border-radius: 11px; background: #121b28; }
+  #justproxy-connection-guide-responsive .jp-help-confirm > svg { color: #90afd9; margin-top: 3px; }
+  #justproxy-connection-guide-responsive .jp-help-confirm strong { font-size: 12px; font-weight: 500; color: #c0d3ee; }
+  #justproxy-connection-guide-responsive .jp-help-confirm p { margin-top: 4px; color: #93a4bc; font-size: 12px; line-height: 1.8; }
+  #justproxy-connection-guide-responsive .jp-help-faq { margin-top: 34px; }
+  #justproxy-connection-guide-responsive .jp-help-faq h2 { margin-bottom: 11px; }
+  #justproxy-connection-guide-responsive .jp-help-faq details { border-bottom: 1px solid var(--jp-help-line); }
+  #justproxy-connection-guide-responsive .jp-help-faq summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 17px 0; color: #bbc8da; font-size: 12px; }
+  #justproxy-connection-guide-responsive .jp-help-faq summary::-webkit-details-marker { display: none; }
+  #justproxy-connection-guide-responsive .jp-help-faq summary svg { width: 14px; height: 14px; color: #7d8fa8; }
+  #justproxy-connection-guide-responsive .jp-help-faq details[open] summary { color: var(--jp-help-text); }
+  #justproxy-connection-guide-responsive .jp-help-faq details[open] summary svg { transform: rotate(45deg); }
+  #justproxy-connection-guide-responsive .jp-help-faq details p { color: var(--jp-help-muted); font-size: 12px; line-height: 1.9; padding: 0 29px 17px 0; }
+  #justproxy-connection-guide-responsive .jp-help-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 25px; color: var(--jp-help-faint); font-size: 11px; }
+  #justproxy-connection-guide-responsive .jp-help-version { margin-left: 7px; color: #738198; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; }
+  @container jp-help (min-width: 820px) {
+    #justproxy-connection-guide-responsive .jp-help-inner { display: grid; grid-template-columns: minmax(0,.94fr) minmax(0,1.06fr); gap: 0 48px; max-width: 1160px; padding: 32px 44px 24px; }
+    #justproxy-connection-guide-responsive .jp-help-header { grid-column: 1 / -1; padding-bottom: 27px; border-bottom: 1px solid #253044; margin-bottom: 34px; }
+    #justproxy-connection-guide-responsive .jp-help-overview { grid-column: 1; }
+    #justproxy-connection-guide-responsive .jp-help-intro { padding: 0 0 26px; }
+    #justproxy-connection-guide-responsive .jp-help-intro h1 { font-size: 40px; line-height: 1.35; }
+    #justproxy-connection-guide-responsive .jp-help-intro h1 > span { display: block; }
+    #justproxy-connection-guide-responsive .jp-help-intro p { font-size: 13px; max-width: 330px; }
+    #justproxy-connection-guide-responsive .jp-help-mobile-break { display: initial; }
+    #justproxy-connection-guide-responsive .jp-help-address { padding: 21px 22px 19px; }
+    #justproxy-connection-guide-responsive .jp-help-values { grid-template-columns: minmax(0,1fr) 96px; gap: 14px; }
+    #justproxy-connection-guide-responsive .jp-help-values dd { font-size: 25px; }
+    #justproxy-connection-guide-responsive .jp-help-values > div + div { padding-left: 15px; }
+    #justproxy-connection-guide-responsive .jp-help-address-bottom { flex-direction: column; align-items: stretch; gap: 14px; }
+    #justproxy-connection-guide-responsive .jp-help-support { justify-content: center; }
+    #justproxy-connection-guide-responsive .jp-help-copy { min-height: 43px; font-size: 13px; }
+    #justproxy-connection-guide-responsive .jp-help-setup { grid-column: 2; margin-top: 0; padding-top: 5px; }
+    #justproxy-connection-guide-responsive .jp-help-section-heading { margin-bottom: 17px; }
+    #justproxy-connection-guide-responsive .jp-help-tabs { gap: 3px; }
+    #justproxy-connection-guide-responsive .jp-help-tabs button { padding: 9px 3px; }
+    #justproxy-connection-guide-responsive .jp-help-steps { padding-top: 27px; }
+    #justproxy-connection-guide-responsive .jp-help-steps ol { gap: 27px; }
+    #justproxy-connection-guide-responsive .jp-help-steps li:not(:last-child)::after { bottom: -21px; }
+    #justproxy-connection-guide-responsive .jp-help-steps li p { font-size: 13px; }
+    #justproxy-connection-guide-responsive .jp-help-confirm { margin-top: 23px; }
+    #justproxy-connection-guide-responsive .jp-help-faq { grid-column: 1 / -1; display: grid; grid-template-columns: 200px minmax(0,1fr); column-gap: 38px; margin-top: 38px; padding-top: 22px; border-top: 1px solid #253044; }
+    #justproxy-connection-guide-responsive .jp-help-faq h2 { grid-column: 1; grid-row: 1 / span 3; padding-top: 14px; }
+    #justproxy-connection-guide-responsive .jp-help-faq details { grid-column: 2; }
+    #justproxy-connection-guide-responsive .jp-help-footer { grid-column: 1 / -1; margin-top: 24px; }
+  }
+  @container jp-help (max-width: 600px) {
+    #justproxy-connection-guide-responsive .jp-help-inner { padding: 24px 22px 23px; }
+    #justproxy-connection-guide-responsive .jp-help-intro { padding: 32px 0 24px; }
+    #justproxy-connection-guide-responsive .jp-help-intro h1 { font-size: 29px; }
+    #justproxy-connection-guide-responsive .jp-help-intro p { font-size: 13px; }
+    #justproxy-connection-guide-responsive .jp-help-mobile-break { display: initial; }
+    #justproxy-connection-guide-responsive .jp-help-address { padding: 18px; }
+    #justproxy-connection-guide-responsive .jp-help-values { grid-template-columns: minmax(0,1fr) 82px; gap: 12px; padding: 20px 0; }
+    #justproxy-connection-guide-responsive .jp-help-values dd { font-size: 21px; letter-spacing: -.65px; }
+    #justproxy-connection-guide-responsive .jp-help-values > div + div { padding-left: 12px; }
+    #justproxy-connection-guide-responsive .jp-help-address-bottom { flex-direction: column; align-items: stretch; gap: 13px; }
+    #justproxy-connection-guide-responsive .jp-help-copy { min-height: 44px; font-size: 13px; }
+    #justproxy-connection-guide-responsive .jp-help-support { justify-content: center; font-size: 11px; }
+    #justproxy-connection-guide-responsive .jp-help-tabs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    #justproxy-connection-guide-responsive .jp-help-tabs button { min-height: 41px; }
+    #justproxy-connection-guide-responsive .jp-help-setup, #justproxy-connection-guide-responsive .jp-help-faq { margin-top: 28px; }
+    #justproxy-connection-guide-responsive .jp-help-section-heading > span { font-size: 11px; }
+    #justproxy-connection-guide-responsive .jp-help-steps li { gap: 11px; }
+    #justproxy-connection-guide-responsive .jp-help-step-foot { padding-left: 40px; }
+    #justproxy-connection-guide-responsive .jp-help-faq summary { gap: 12px; line-height: 1.7; }
+  }
+  @container jp-help (max-width: 350px) {
+    #justproxy-connection-guide-responsive .jp-help-inner { padding-right: 18px; padding-left: 18px; }
+    #justproxy-connection-guide-responsive .jp-help-values { grid-template-columns: minmax(0,1fr) 57px; gap: 8px; }
+    #justproxy-connection-guide-responsive .jp-help-values dd { font-size: 19px; }
+    #justproxy-connection-guide-responsive .jp-help-values > div + div { padding-left: 8px; }
+    #justproxy-connection-guide-responsive .jp-help-intro h1 { font-size: 27px; letter-spacing: -.8px; }
+  }
+  @container jp-help (max-width: 380px) {
+    #justproxy-connection-guide-responsive .jp-help-values { grid-template-columns: minmax(0,1fr); gap: 14px; }
+    #justproxy-connection-guide-responsive .jp-help-values > div + div { display: flex; align-items: baseline; justify-content: space-between; border-left: 0; border-top: 1px solid #344255; padding: 12px 0 0; }
+  }
+  @container jp-help (min-width: 820px) and (max-width: 999px) {
+    #justproxy-connection-guide-responsive .jp-help-values { grid-template-columns: minmax(0,1fr); gap: 14px; }
+    #justproxy-connection-guide-responsive .jp-help-values > div + div { display: flex; align-items: baseline; justify-content: space-between; border-left: 0; border-top: 1px solid #344255; padding: 12px 0 0; }
+  }
+  @media (pointer: coarse) {
+    #justproxy-connection-guide-responsive .jp-help-tabs button,
+    #justproxy-connection-guide-responsive .jp-help-copy { min-height: 44px; }
+    #justproxy-connection-guide-responsive .jp-help-source { min-height: 44px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #justproxy-connection-guide-responsive .jp-help-copy { transition: none; }
+  }
+
+</style>
+</head>
+<body>
+<div id="justproxy-connection-guide-responsive" lang="zh-CN">
+  <article class="jp-help-page" aria-label="JustProxy 连接指南">
+    <div class="jp-help-inner">
+      <header class="jp-help-header">
+        <div class="jp-help-brand">
+          <span class="jp-help-mark" aria-hidden="true"><span></span><span></span></span>
+          <div><strong>JustProxy</strong><span>HTTP PROXY</span></div>
+        </div>
+      </header>
+
+      <div class="jp-help-overview">
+      <section class="jp-help-intro" aria-labelledby="jp-help-title">
+        <span class="jp-help-status"><span aria-hidden="true"></span>代理地址可达</span>
+        <h1 id="jp-help-title">你的代理，<span>已就绪。</span></h1>
+        <p>将下方地址填入设备的代理设置，<br class="jp-help-mobile-break">开始转发网络请求。</p>
+      </section>
+
+      <section class="jp-help-address" aria-label="代理连接信息">
+        <div class="jp-help-address-top"><span>连接信息</span><span class="jp-help-protocol">HTTP</span></div>
+        <dl class="jp-help-values">
+          <div><dt>服务器地址</dt><dd class="jp-help-host">{{HOST}}</dd></div>
+          <div><dt>端口</dt><dd>{{PORT}}</dd></div>
+        </dl>
+        <div class="jp-help-address-bottom">
+          <span class="jp-help-support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3-4 4 4 4M4 7h16m-4 6 4 4-4 4m4-4H4"/></svg>支持 HTTP / HTTPS 请求</span>
+          <button type="button" class="jp-help-copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></svg><span>复制代理地址</span></button>
+        </div>
+        <div class="jp-help-copy-fallback" hidden>
+          <label for="jp-help-copy-value">请选择并复制地址</label>
+          <input id="jp-help-copy-value" readonly value="{{HOST}}:{{PORT}}" aria-label="可手动复制的代理地址">
+        </div>
+        <span class="jp-help-live" aria-live="polite"></span>
+      </section>
+      </div>
+
+      <section class="jp-help-setup" aria-labelledby="jp-help-setup-title">
+        <div class="jp-help-section-heading"><h2 id="jp-help-setup-title">在设备上配置</h2><span class="jp-help-device-note">选择你的设备</span></div>
+        <div class="jp-help-tabs" role="tablist" aria-label="接入设备类型">
+          <button type="button" id="jp-help-tab-mac" role="tab" aria-selected="false" aria-controls="jp-help-steps" data-platform="mac">macOS</button>
+          <button type="button" id="jp-help-tab-windows" role="tab" aria-selected="false" aria-controls="jp-help-steps" data-platform="windows">Windows</button>
+          <button type="button" id="jp-help-tab-ios" role="tab" aria-selected="false" aria-controls="jp-help-steps" data-platform="ios">iPhone / iPad</button>
+          <button type="button" id="jp-help-tab-android" role="tab" aria-selected="false" aria-controls="jp-help-steps" data-platform="android">Android</button>
+        </div>
+        <div id="jp-help-steps" class="jp-help-steps" role="tabpanel" aria-labelledby="jp-help-tab-ios" aria-live="polite">
+          <ol>
+            <li><span class="jp-help-step-number" aria-hidden="true">01</span><div><h3>打开当前 Wi-Fi 的设置</h3><p>设置 → 无线局域网 → 当前网络右侧的详情按钮。</p></div></li>
+            <li><span class="jp-help-step-number" aria-hidden="true">02</span><div><h3>选择手动代理</h3><p>找到「配置代理」，将配置方式设为「手动」。</p></div></li>
+            <li><span class="jp-help-step-number" aria-hidden="true">03</span><div><h3>填入地址并保存</h3><p>服务器填写 {{HOST}}，端口填写 {{PORT}}。关闭「认证」，然后保存。</p></div></li>
+          </ol>
+          <div class="jp-help-step-foot"><span class="jp-help-platform-note">在需要使用代理的设备上操作。</span><a class="jp-help-source" href="https://support.apple.com/en-ie/guide/iphone/iphw5gjwl8k2/27/ios/27" target="_blank" rel="noopener noreferrer">系统设置说明<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 17 10-10M7 7h10v10"/></svg></a></div>
+        </div>
+        <div class="jp-help-confirm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><div><strong>确认请求已通过代理</strong><p>保存后访问网页，再到 JustProxy 的「流量」页查看是否出现新的连接记录。</p></div></div>
+      </section>
+
+      <section class="jp-help-faq" aria-labelledby="jp-help-faq-title">
+        <h2 id="jp-help-faq-title">你可能还想知道</h2>
+        <details>
+          <summary>打开这个页面，就已经在使用代理了吗？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+          <p>打开此页说明代理地址可以访问。还需要完成上面的代理设置，支持并遵循该设置的请求才会通过 JustProxy 转发。</p>
+        </details>
+        <details>
+          <summary>一定要开启个人热点吗？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+          <p>不需要。设备也可以通过同一 Wi-Fi 连接，只要网络允许设备互相访问。使用个人热点时，让另一台设备连上热点，并填写 JustProxy 显示的热点地址。</p>
+        </details>
+        <details>
+          <summary>配置后无法上网，怎么办？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+          <p>回到 JustProxy 确认代理正在运行，并核对当前地址和端口。网络切换后，地址可能改变；部分应用需要单独设置代理。停止使用 JustProxy 后，请关闭设备上的手动代理。</p>
+        </details>
+      </section>
+
+      <footer class="jp-help-footer"><span>JustProxy <span class="jp-help-version">{{VERSION}}</span></span><span>只做简单的代理转发。</span></footer>
+    </div>
+  </article>
+</div>
+
+
+
+<script>
+(() => {
+  const root = document.getElementById('justproxy-connection-guide-responsive');
+  const page = root.querySelector('.jp-help-page');
+  const panel = root.querySelector('#jp-help-steps');
+  const tabs = Array.from(root.querySelectorAll('[data-platform]'));
+  const guides = {
+    ios: {
+      steps: [
+        ['打开当前 Wi-Fi 的设置', '设置 → 无线局域网 → 当前网络右侧的详情按钮。'],
+        ['选择手动代理', '找到「配置代理」，将配置方式设为「手动」。'],
+        ['填入地址并保存', '服务器填写 {{HOST}}，端口填写 {{PORT}}。关闭「认证」，然后保存。']
+      ],
+      note: '在需要使用代理的设备上操作。',
+      source: 'https://support.apple.com/en-ie/guide/iphone/iphw5gjwl8k2/27/ios/27'
+    },
+    android: {
+      steps: [
+        ['编辑当前 Wi-Fi 网络', '打开设置，进入已连接的 Wi-Fi 网络，选择编辑网络。'],
+        ['将代理设为手动', '在高级选项中找到「代理」，选择「手动」。'],
+        ['填入地址并保存', '代理主机名填写 {{HOST}}，代理端口填写 {{PORT}}，然后保存。']
+      ],
+      note: '不同品牌的菜单名称可能略有差异。',
+      source: 'https://support.google.com/pixelphone/answer/9655181?hl=en-GB'
+    },
+    mac: {
+      steps: [
+        ['打开网络代理设置', '系统设置 → 网络 → 当前网络 → 详细信息 → 代理。'],
+        ['开启网页代理', '开启「网页代理（HTTP）」和「安全网页代理（HTTPS）」。'],
+        ['填写相同的服务器与端口', '两项均填写服务器 {{HOST}}、端口 {{PORT}}，不开启密码认证，然后确认。']
+      ],
+      note: '选择当前使用的 Wi-Fi 或以太网连接。',
+      source: 'https://support.apple.com/en-gb/guide/mac-help/mchlp2591/mac'
+    },
+    windows: {
+      steps: [
+        ['打开系统代理设置', '设置 → 网络和 Internet → 代理。'],
+        ['开启手动代理', '在「手动设置代理」中，开启「使用代理服务器」。'],
+        ['填入地址并保存', '代理 IP 地址填写 {{HOST}}，端口填写 {{PORT}}，然后保存。']
+      ],
+      note: '适用于 Windows 10 / 11。',
+      source: 'https://support.microsoft.com/en-us/windows/experience/connectivity-networking/use-a-proxy-server-in-windows'
+    },
+    generic: {
+      steps: [
+        ['找到代理设置', '打开接入设备的网络设置，或应用内的代理设置。'],
+        ['选择手动 HTTP 代理', '将代理类型设为 HTTP，并使用手动配置。'],
+        ['填写地址和端口', '服务器填写 {{HOST}}，端口填写 {{PORT}}。无需用户名和密码。']
+      ],
+      note: '也可以选择上方设备，查看对应的详细步骤。',
+      source: null
+    }
+  };
+  const names = { ios: 'iPhone / iPad', android: 'Android', mac: 'macOS', windows: 'Windows' };
+  function detectPlatform() {
+    const agent = navigator.userAgent || '';
+    // The guide runs over HTTP too, so Client Hints are optional.
+    const platform = navigator.userAgentData?.platform || navigator.platform || '';
+    if (/Android/i.test(agent + platform)) return 'android';
+    if (/iPhone|iPad|iPod/i.test(agent) || (/Mac/i.test(platform) && navigator.maxTouchPoints > 1)) return 'ios';
+    if (/Win/i.test(agent + platform)) return 'windows';
+    if (/Mac/i.test(agent + platform)) return 'mac';
+    return 'generic';
+  }
+  const detected = detectPlatform();
+  let selected = detected;
+  function renderGuide(platform, mode = 'automatic') {
+    selected = Object.prototype.hasOwnProperty.call(guides, platform) ? platform : 'generic';
+    const guide = guides[selected];
+    tabs.forEach(tab => tab.setAttribute('aria-selected', String(tab.dataset.platform === selected)));
+    panel.setAttribute('aria-labelledby', selected === 'generic' ? 'jp-help-setup-title' : 'jp-help-tab-' + selected);
+    root.querySelector('.jp-help-device-note').textContent = selected === 'generic' ? '选择你的设备' : (mode === 'manual' ? '已选择 ' : '当前设备 · ') + names[selected];
+    Array.from(panel.querySelectorAll('li')).forEach((step, index) => {
+      step.querySelector('h3').textContent = guide.steps[index][0];
+      step.querySelector('p').textContent = guide.steps[index][1];
+    });
+    panel.querySelector('.jp-help-platform-note').textContent = guide.note;
+    const source = panel.querySelector('.jp-help-source');
+    source.hidden = !guide.source;
+    if (guide.source) source.href = guide.source;
+  }
+  tabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => { renderGuide(tab.dataset.platform, 'manual'); });
+    tab.addEventListener('keydown', event => {
+      let next = index;
+      if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+      else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = tabs.length - 1;
+      else return;
+      event.preventDefault();
+      tabs[next].focus();
+      renderGuide(tabs[next].dataset.platform, 'manual');
+
+    });
+  });
+  renderGuide(detected);
+
+  const copyButton = root.querySelector('.jp-help-copy');
+  const copyLabel = copyButton.querySelector('span');
+  const fallback = root.querySelector('.jp-help-copy-fallback');
+  const live = root.querySelector('.jp-help-live');
+  let copyTimer;
+  copyButton.addEventListener('click', async () => {
+    const address = '{{HOST}}:{{PORT}}';
+    let copied = false;
+    try {
+      if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(address); copied = true; }
+    } catch (_) {}
+    if (!copied) {
+      fallback.hidden = false;
+      const field = fallback.querySelector('input');
+      field.focus(); field.select();
+      try { copied = document.execCommand('copy'); } catch (_) {}
+    }
+    clearTimeout(copyTimer);
+    if (copied) {
+      fallback.hidden = true;
+      copyLabel.textContent = '已复制';
+      live.textContent = '已复制代理地址 ' + address;
+      copyButton.focus();
+      copyTimer = setTimeout(() => { copyLabel.textContent = '复制代理地址'; }, 2200);
+    } else {
+      copyLabel.textContent = '复制代理地址';
+      live.textContent = '请手动复制已选中的代理地址。';
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
