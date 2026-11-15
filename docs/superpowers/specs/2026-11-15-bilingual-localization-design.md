@@ -1,6 +1,6 @@
 # Bilingual App and Store Presentation
 
-Status: Implemented for the authorized 1.0.3 (build 10) release on November 15, 2026. App Review submission is authorized. The user also authorized committing all project changes and creating a pull request, which the user will merge. The website deploys after that merge to master.
+Status: Implemented for the authorized 1.0.3 (build 10) release on November 15, 2026. App Review submission is authorized. The user authorized committing and pushing all project changes to dev and will merge dev into master. No pull request is required. The website deploys after that merge.
 
 ## Intent and agreed behavior
 

@@ -65,4 +65,3 @@ After release, verify the saved metadata, territory availability, ID-based publi
 - [App information](https://developer.apple.com/help/app-store-connect/reference/app-information/app-information/)
 - [Platform version information](https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information/)
 - [Localize app information](https://developer.apple.com/help/app-store-connect/manage-app-information/localize-app-information)
-
