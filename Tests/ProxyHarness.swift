@@ -12,17 +12,24 @@ struct ProxyHarness {
         case "--cellular-selection":
             printCellularSelection()
             return
+        case "--ipv6-selection":
+            printIPv6Selection()
+            return
         default:
             break
         }
 
         let started = DispatchSemaphore(value: 0)
         let stopped = DispatchSemaphore(value: 0)
-        let localAddress = IPv4Address.loopback
+        let loopback = arguments.first == "--ipv6" ? "::1" : "127.0.0.1"
+        guard let localAddress = LocalAddress.addresses().first(where: { "\($0.address)" == loopback })?.address else {
+            write("UNAVAILABLE \(loopback)")
+            return
+        }
         let interface =
             arguments.first == "--interface"
             ? arguments.dropFirst().first
-            : LocalIPv4.addresses().first { $0.address == localAddress }?.interface
+            : LocalAddress.addresses().first { $0.address == localAddress }?.interface
         let port = arguments.first.flatMap(UInt16.init) ?? 0
         let server = ProxyServer(address: localAddress, interface: interface, port: port) { event in
             switch event {
@@ -52,12 +59,12 @@ struct ProxyHarness {
     }
 
     private static func printListenerAddresses() {
-        let wifi = LocalIPv4(interface: "en5", address: IPv4Address("192.168.42.19")!)
-        let hotspot = LocalIPv4(interface: "bridge100", address: IPv4Address("192.0.0.1")!)
-        let cellular = LocalIPv4(interface: "pdp_ip0", address: IPv4Address("100.64.10.3")!)
-        let vpn = LocalIPv4(interface: "utun3", address: IPv4Address("10.8.0.2")!)
-        let unconfiguredWiFi = LocalIPv4(interface: wifi.interface, address: .any)
-        let loopback = LocalIPv4(interface: "lo0", address: .loopback)
+        let wifi = LocalAddress(interface: "en5", address: NWEndpoint.Host("192.168.42.19"))
+        let hotspot = LocalAddress(interface: "bridge100", address: NWEndpoint.Host("192.0.0.1"))
+        let cellular = LocalAddress(interface: "pdp_ip0", address: NWEndpoint.Host("100.64.10.3"))
+        let vpn = LocalAddress(interface: "utun3", address: NWEndpoint.Host("10.8.0.2"))
+        let unconfiguredWiFi = LocalAddress(interface: wifi.interface, address: .ipv4(.any))
+        let loopback = LocalAddress(interface: "lo0", address: .ipv4(.loopback))
         let networks = [
             [cellular, wifi], [wifi, hotspot, cellular], [cellular, vpn, unconfiguredWiFi], [vpn, loopback],
         ]
@@ -69,9 +76,9 @@ struct ProxyHarness {
     }
 
     private static func printCellularSelection() {
-        let wifi = LocalIPv4(interface: "en5", address: IPv4Address("192.168.42.19")!)
-        let primary = LocalIPv4(interface: "pdp_ip2", address: IPv4Address("100.64.10.3")!)
-        let secondary = LocalIPv4(interface: "pdp_ip0", address: IPv4Address("100.64.20.4")!)
+        let wifi = LocalAddress(interface: "en5", address: NWEndpoint.Host("192.168.42.19"))
+        let primary = LocalAddress(interface: "pdp_ip2", address: NWEndpoint.Host("100.64.10.3"))
+        let secondary = LocalAddress(interface: "pdp_ip0", address: NWEndpoint.Host("100.64.20.4"))
         let local = [secondary, primary, wifi]
         let radios = ["first": "5G", "second": "4G"]
         let initial = ListenerNetworks(
@@ -96,5 +103,31 @@ struct ProxyHarness {
         write(switched.resolve(selectedWiFi).map { "\($0.local.address)" } ?? "-")
         write(reusedAddress.resolve(selectedCellular).map { "\($0.local.address)" } ?? "-")
         write(noIPv4.resolve(nil).map { "\($0.local.address)" } ?? "-")
+    }
+
+    private static func printIPv6Selection() {
+        let wifi = LocalAddress(interface: "en5", address: "2001:db8:1::2")
+        let ipv4 = LocalAddress(interface: "en5", address: "192.168.42.19")
+        let ipv4LinkLocal = LocalAddress(interface: "en5", address: "169.254.10.2")
+        let cellular = LocalAddress(interface: "pdp_ip0", address: "2001:db8:2::2")
+        let hotspot = LocalAddress(interface: "bridge100", address: "fd00:1::1")
+        let vpn = LocalAddress(interface: "utun3", address: "2001:db8:3::2")
+        let unusable = ["::", "::1", "fe80::1", "ff02::1", "::ffff:192.0.2.1"].map {
+            LocalAddress(interface: "en5", address: .ipv6(IPv6Address($0)!))
+        }
+        for local in [
+            [vpn, cellular, wifi] + unusable,
+            [wifi, ipv4, cellular],
+            [ipv4LinkLocal, wifi],
+            [ipv4LinkLocal],
+            [cellular, hotspot, wifi],
+            [vpn, cellular] + unusable,
+            [vpn] + unusable,
+        ] {
+            let networks = ListenerNetworks(
+                local: local, wifiInterfaces: [wifi.interface], cellularInterface: cellular.interface)
+            write(networks.addresses.map { "\($0.local.address)" }.joined(separator: ","))
+            write(networks.resolve(nil).map { "\($0.local.address.httpAuthorityHost):8080" } ?? "-")
+        }
     }
 }

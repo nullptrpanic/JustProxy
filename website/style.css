@@ -2,8 +2,11 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: radial-gradient(ellipse at 50% 0, #20242c, transparent 580px); line-height: 1.8; }
 main { width: min(100% - 40px, 760px); margin: 0 auto; padding: 48px 0 64px; }
-nav { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-bottom: 28px; border-bottom: 1px solid #2b303a; }
+nav { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; padding-bottom: 28px; border-bottom: 1px solid #2b303a; }
 nav a { text-decoration: none; }
+html[data-language="en"] main[data-language="zh"], html[data-language="zh"] main[data-language="en"] { display: none; }
+.languages { display: flex; gap: 12px; font-size: 13px; }
+.languages [aria-current="true"] { color: #edf0f5; text-decoration: underline; }
 .brand { color: #edf0f5; font-size: 22px; font-weight: 700; letter-spacing: -.6px; }
 .eyebrow { margin-top: 44px; color: #9cbaff; font-size: 13px; letter-spacing: 2px; }
 h1 { margin: 12px 0 16px; font-size: clamp(30px, 6vw, 42px); line-height: 1.25; letter-spacing: -1px; }

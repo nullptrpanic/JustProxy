@@ -1,0 +1,23 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSLocalNetworkUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JustProxy forwards proxy requests from connected devices. Some destinations may be on your local network."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JustProxy 转发已连接设备的代理请求，部分目标可能位于本地网络。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -1,15 +1,46 @@
 <!doctype html>
-<html lang="zh-Hans">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="JustProxy 使用说明与技术支持：在 iPhone 上开启 HTTP 代理，选择监听地址，查看会话流量。">
-  <title>JustProxy · 使用说明与支持</title>
+  <meta name="description" content="JustProxy setup and support: run an HTTP proxy on iPhone, choose a listening address, and view session traffic.">
+  <title>JustProxy · Setup and support</title>
   <link rel="stylesheet" href="style.css">
+  <script src="language.js"></script>
 </head>
 <body>
-<main>
-  <nav aria-label="网站导航"><a class="brand" href="./">JustProxy</a><a href="privacy/">隐私政策</a></nav>
+<main id="english" data-language="en" lang="en" data-title="JustProxy · Setup and support" data-description="JustProxy setup and support: run an HTTP proxy on iPhone, choose a listening address, and view session traffic.">
+  <nav aria-label="Site navigation"><a data-site-link class="brand" href="./">JustProxy</a><a data-site-link href="privacy/">Privacy policy</a><span class="languages" aria-label="Language"><a data-language-choice="zh" href="?lang=zh#chinese" lang="zh-Hans">中文</a><a data-language-choice="en" href="?lang=en#english" lang="en">English</a></span></nav>
+  <p class="eyebrow">HTTP PROXY</p>
+  <h1>Start simply. See clearly.</h1>
+  <p>JustProxy is an HTTP proxy for iPhone. Start the proxy, enter its address and port in your client’s proxy settings, and view session traffic and recent connections in the app.</p>
+  <section class="card">
+    <h2>Get connected</h2>
+    <ol>
+      <li>Connect your iPhone and client to a network that allows them to communicate. Personal Hotspot is optional; you can use the same Wi-Fi network.</li>
+      <li>Open JustProxy and use Automatic or choose an available listening address.</li>
+      <li>Tap the main power button to start the proxy.</li>
+      <li>Enter the IP address shown in the app and port 8080 in your client’s HTTP proxy settings.</li>
+      <li>Open the proxy address in your client’s browser for setup instructions tailored to that device.</li>
+    </ol>
+  </section>
+  <h2>Traffic and connections</h2>
+  <p>The Traffic page shows total uploaded and downloaded bytes, along with the destination, port, and traffic for recent connections. Only requests forwarded through JustProxy count toward these statistics.</p>
+  <h2>Connection troubleshooting</h2>
+  <p>Check that the proxy is running, that the client uses the same IP and port as the app, and that the network allows communication between the devices. Some networks isolate devices, and cellular addresses may not be reachable by other devices. Check the listening address again after changing networks.</p>
+  <h2>Background operation</h2>
+  <p>Keep JustProxy in the foreground for sustained use. iOS may suspend or end the app in the background. Check the proxy status when returning to the app and start it again if needed.</p>
+  <h2>Stop the proxy</h2>
+  <p>Tap the main power button again to stop the proxy. Turn off the client’s manual proxy setting when finished. Provide proxy access only to devices you trust.</p>
+  <section class="card">
+    <h2>Contact support</h2>
+    <p>When reporting an issue, include your iPhone model, iOS version, JustProxy version, and steps to reproduce it. Do not send passwords, tokens, or sensitive network content.</p>
+    <a href="mailto:liyufeiat010@gmail.com">liyufeiat010@gmail.com</a>
+  </section>
+  <footer>JustProxy · <a data-site-link href="privacy/">Privacy policy</a></footer>
+</main>
+<main id="chinese" data-language="zh" lang="zh-Hans" data-title="JustProxy · 使用说明与支持" data-description="JustProxy 使用说明与技术支持：在 iPhone 上开启 HTTP 代理，选择监听地址，查看会话流量。">
+  <nav aria-label="网站导航"><a data-site-link class="brand" href="./">JustProxy</a><a data-site-link href="privacy/">隐私政策</a><span class="languages" aria-label="Language"><a data-language-choice="zh" href="?lang=zh#chinese" lang="zh-Hans">中文</a><a data-language-choice="en" href="?lang=en#english" lang="en">English</a></span></nav>
   <p class="eyebrow">HTTP PROXY</p>
   <h1>简单开启，清楚查看。</h1>
   <p>JustProxy 是一款 iPhone HTTP 代理工具。开启代理后，将显示的地址和端口填入客户端的代理设置，即可转发请求，并在应用中查看会话流量和最近连接。</p>
@@ -36,7 +67,7 @@
     <p>如遇问题，请说明 iPhone 型号、iOS 版本、JustProxy 版本及复现步骤。请勿发送密码、令牌或敏感网络内容。</p>
     <a href="mailto:liyufeiat010@gmail.com">liyufeiat010@gmail.com</a>
   </section>
-  <footer>JustProxy · <a href="privacy/">隐私政策</a></footer>
+  <footer>JustProxy · <a data-site-link href="privacy/">隐私政策</a></footer>
 </main>
 </body>
 </html>

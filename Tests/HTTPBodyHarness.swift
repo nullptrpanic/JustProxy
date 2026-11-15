@@ -16,6 +16,20 @@ struct HTTPBodyHarness {
             var usage = rusage()
             guard getrusage(RUSAGE_SELF, &usage) == 0 else { fatalError("getrusage failed") }
             print(received, body.finished, usage.ru_maxrss)
+        case "chunked-stream":
+            let length = UInt64(CommandLine.arguments[2])! * 1024 * 1024
+            var body = HTTPBody(.chunked)
+            let chunk = Data(repeating: 65, count: 32 * 1024)
+            var received = try body.consume(Data("\(String(length, radix: 16))\r\n".utf8), eof: false).count
+            for _ in 0..<(length / UInt64(chunk.count)) {
+                let forwarded = try body.consume(chunk, eof: false)
+                guard forwarded == chunk else { fatalError("Chunk payload changed") }
+                received += forwarded.count
+            }
+            received += try body.consume(Data("\r\n0\r\n\r\n".utf8), eof: true).count
+            var usage = rusage()
+            guard getrusage(RUSAGE_SELF, &usage) == 0 else { fatalError("getrusage failed") }
+            print(received, body.finished, usage.ru_maxrss)
         case "fragments":
             var body = HTTPBody(.fixed(5))
             print(try body.consume(Data(), eof: false).count, body.finished)

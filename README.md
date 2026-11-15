@@ -15,18 +15,20 @@ JustProxy accepts requests from clients configured to use its displayed address 
 - Open the listening address in a browser for a device-aware setup guide, with manual device selection available.
 - Read the in-app privacy explanation from the question mark in the top-right corner.
 
-The app and public support pages currently use Simplified Chinese. Repository documentation is maintained in English.
+The app supports English and Simplified Chinese, following the system or per-app language preference with English as the fallback. The bundled setup guide and public support/privacy pages follow the browser's language preferences and offer a language switch. Repository documentation is maintained in English.
 
 ## Use the proxy
 
 1. Connect the iPhone and client to a network that allows them to communicate.
 2. Open JustProxy, choose a listening address, and tap the power control.
 3. Configure the client's HTTP proxy with the displayed IP address and port `8080`.
-4. Open `http://<displayed-ip>:8080/` in a browser for setup instructions, or use a proxy-aware client:
+4. Add `http://` before the copied endpoint to open the setup guide, or use a proxy-aware client:
 
    ```sh
    curl --proxy 'http://<displayed-ip>:8080' https://example.com/
    ```
+
+   IPv6 endpoints include brackets, for example `http://[2001:db8::2]:8080/`. When the client has separate server and port fields, enter the IP address without brackets and port `8080`.
 
 5. Tap the power control again to stop. Disable the client's manual proxy setting when finished.
 
@@ -34,7 +36,7 @@ The app and public support pages currently use Simplified Chinese. Repository do
 
 - JustProxy provides an explicit HTTP proxy. It does not automatically intercept hotspot traffic, create a VPN, or configure a system-wide VPN.
 - Outbound connections follow iOS routing. Choosing a listening address selects where clients connect; it does not choose an outbound VPN or guarantee that another VPN carries the traffic.
-- The listener uses IPv4. A listed cellular address may be unreachable from other devices because of carrier routing or network isolation.
+- The listener supports IPv4 and IPv6. It prefers configured IPv4 on each interface, then IPv6, then self-assigned IPv4 (`169.254.*`). IPv6 link-local addresses are not advertised because clients require their own interface scope. A listed cellular address may be unreachable from other devices because of carrier routing or network isolation.
 - The proxy does not implement client authentication. Use it only with trusted clients on trusted networks.
 - Background execution is best effort. Switching apps does not explicitly stop the listener, but iOS may suspend or terminate the app. Keep JustProxy in the foreground for sustained use.
 - HTTPS CONNECT relays tunnel bytes without installing certificates or decrypting HTTPS.
@@ -70,9 +72,10 @@ Run the socket-level integration suite on macOS:
 
 ```sh
 python3 Tests/proxy_integration.py
+node Tests/web_language.js
 ```
 
-The suite compiles native Swift/C harnesses and uses loopback sockets to exercise HTTP forwarding, CONNECT tunnels, body framing, the local setup guide, traffic accounting, listener selection, and background-task bookkeeping. Temporary test binaries are created under `build/Tests/`.
+The integration suite compiles native Swift/C harnesses and uses loopback sockets to exercise HTTP forwarding, CONNECT tunnels, body framing, the local setup guide, traffic accounting, listener selection, and background-task bookkeeping. Temporary test binaries are created under `build/Tests/`. The Node.js test checks browser language selection and explicit overrides in the guide and website without third-party dependencies.
 
 These checks do not replace physical-device testing of network reachability, Personal Hotspot, cellular routing, or iOS background suspension.
 
@@ -84,6 +87,7 @@ These checks do not replace physical-device testing of network reachability, Per
 | `JustProxy/Proxy/` | Listener discovery, HTTP parsing, forwarding, and the bundled connection guide |
 | `JustProxy.xcodeproj/` | iOS project and build configuration |
 | `Tests/` | Native harnesses and Python integration tests |
+| `AppStore/metadata/` | Localized App Store names, subtitles, keywords, descriptions, and release notes |
 | `docs/` | Project design and maintenance documentation |
 | `website/` | Public support and privacy pages deployed to GitHub Pages |
 | `.github/workflows/pages.yml` | Website deployment from `master` |

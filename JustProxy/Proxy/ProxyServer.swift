@@ -23,7 +23,7 @@ final class ProxyServer: @unchecked Sendable {
         case stopped(ProxyTraffic, failure: String?)
     }
 
-    private let address: IPv4Address
+    private let address: NWEndpoint.Host
     private let interface: String?
     private let port: UInt16
     private let report: @Sendable (Event) -> Void
@@ -35,7 +35,7 @@ final class ProxyServer: @unchecked Sendable {
     private var trafficChanged = false
     private var stopped = false
 
-    init(address: IPv4Address, interface: String? = nil, port: UInt16, report: @escaping @Sendable (Event) -> Void) {
+    init(address: NWEndpoint.Host, interface: String? = nil, port: UInt16, report: @escaping @Sendable (Event) -> Void) {
         self.address = address
         self.interface = interface
         self.port = port
@@ -54,7 +54,7 @@ final class ProxyServer: @unchecked Sendable {
         queue.async {
             guard !self.stopped, let listener = self.listener else { return }
             guard self.addressIsAssigned else {
-                self.finish(failure: "当前网络地址已失效。")
+                self.finish(failure: String(localized: "The current network address is no longer available."))
                 return
             }
             switch listener.state {
@@ -63,17 +63,18 @@ final class ProxyServer: @unchecked Sendable {
             case .setup:
                 break
             default:
-                self.finish(failure: "代理监听已停止，请重新开启。")
+                self.finish(failure: String(localized: "The proxy listener has stopped. Start the proxy again."))
             }
         }
     }
 
     private func listen() {
         guard !stopped, listener == nil, let port = NWEndpoint.Port(rawValue: port) else { return }
-        let listenAddress: IPv4Address
+        let listenAddress: NWEndpoint.Host
         if let interface {
-            guard addressIsAssigned, let scopedAddress = IPv4Address("\(address)%\(interface)") else {
-                finish(failure: "当前监听地址已失效。")
+            let scopedAddress = NWEndpoint.Host("\(address)%\(interface)")
+            guard addressIsAssigned, scopedAddress.interface?.name == interface else {
+                finish(failure: String(localized: "The selected listening address is no longer available."))
                 return
             }
             listenAddress = scopedAddress
@@ -83,7 +84,7 @@ final class ProxyServer: @unchecked Sendable {
         do {
             let parameters = NWParameters.tcp
             parameters.requiredInterface = listenAddress.interface
-            parameters.requiredLocalEndpoint = .hostPort(host: .ipv4(listenAddress), port: port)
+            parameters.requiredLocalEndpoint = .hostPort(host: listenAddress, port: port)
             let listener = try NWListener(using: parameters)
             self.listener = listener
             listener.newConnectionHandler = { [weak self] client in
@@ -98,20 +99,20 @@ final class ProxyServer: @unchecked Sendable {
                 switch state {
                 case .ready:
                     guard let port = listener.port else {
-                        self.finish(failure: "无法取得代理端口。")
+                        self.finish(failure: String(localized: "The proxy port could not be determined."))
                         return
                     }
                     self.report(.ready(port.rawValue))
                     self.startTimer()
                 case .failed(let error), .waiting(let error):
-                    self.finish(failure: "代理监听失败（\(error.localizedDescription)）")
+                    self.finish(failure: String(localized: "Proxy listener failed (\(error.localizedDescription))"))
                 default:
                     break
                 }
             }
             listener.start(queue: queue)
         } catch {
-            finish(failure: "代理监听失败（\(error.localizedDescription)）")
+            finish(failure: String(localized: "Proxy listener failed (\(error.localizedDescription))"))
         }
     }
 
@@ -167,7 +168,7 @@ final class ProxyServer: @unchecked Sendable {
     private func tick() {
         guard !stopped else { return }
         guard addressIsAssigned else {
-            finish(failure: "当前网络地址已失效，请重新开启代理。")
+            finish(failure: String(localized: "The current network address is no longer available. Start the proxy again."))
             return
         }
         let now = DispatchTime.now()
@@ -179,7 +180,7 @@ final class ProxyServer: @unchecked Sendable {
     }
 
     private var addressIsAssigned: Bool {
-        LocalIPv4.addresses().contains { $0.address == address && (interface == nil || $0.interface == interface) }
+        LocalAddress.addresses().contains { $0.address == address && (interface == nil || $0.interface == interface) }
     }
 
     private func finish(failure: String?) {

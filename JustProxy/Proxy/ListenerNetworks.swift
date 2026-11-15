@@ -8,7 +8,7 @@ struct ListenerAddress: Identifiable, Hashable {
     }
 
     let kind: Kind
-    let local: LocalIPv4
+    let local: LocalAddress
     let dataServiceID: String?
 
     var id: Self { self }
@@ -20,19 +20,43 @@ struct ListenerNetworks: Equatable {
     let cellularGenerations: [String: String]
 
     init(
-        local: [LocalIPv4] = [], wifiInterfaces: Set<String> = [], cellularInterface: String? = nil,
+        local: [LocalAddress] = [], wifiInterfaces: Set<String> = [], cellularInterface: String? = nil,
         dataServiceID: String? = nil, cellularGenerations: [String: String] = [:]
     ) {
         self.dataServiceID = dataServiceID
         self.cellularGenerations = cellularGenerations
 
-        let usable = local.filter { $0.address != .any && !$0.address.isLoopback }
+        let unicast = local.filter {
+            guard let ip = $0.address.ipAddress, !ip.isLoopback, !ip.isMulticast,
+                ip.rawValue.contains(where: { $0 != 0 }) else { return false }
+            // A link-local IPv6 endpoint needs a scope on the client, not the phone's interface name.
+            if case .ipv6(let address) = $0.address {
+                return !address.isLinkLocal && !address.isIPv4Mapped && !address.isIPv4Compatabile
+            }
+            return true
+        }
+        let ipv4Interfaces = Set(unicast.compactMap { local -> String? in
+            if case .ipv4(let ip) = local.address, !ip.isLinkLocal { return local.interface }
+            return nil
+        })
+        let ipv6Interfaces = Set(unicast.compactMap { local -> String? in
+            if case .ipv6 = local.address { return local.interface }
+            return nil
+        })
+        // Prefer configured IPv4, then IPv6, then self-assigned IPv4 on each interface.
+        let usable = unicast.filter {
+            if case .ipv6 = $0.address { return !ipv4Interfaces.contains($0.interface) }
+            if case .ipv4(let ip) = $0.address, ip.isLinkLocal {
+                return ipv4Interfaces.contains($0.interface) || !ipv6Interfaces.contains($0.interface)
+            }
+            return true
+        }
         // Personal Hotspot has no public interface type. Retain the known bridge checks.
         let hotspot =
             usable.first { $0.interface == "bridge100" }
             ?? usable.first {
                 ($0.interface.hasPrefix("bridge") || $0.interface.hasPrefix("ap"))
-                    && $0.address == IPv4Address("172.20.10.1")
+                    && $0.address == NWEndpoint.Host("172.20.10.1")
             }
         var addresses = hotspot.map { [ListenerAddress(kind: .hotspot, local: $0, dataServiceID: nil)] } ?? []
         addresses += usable.filter { $0 != hotspot && wifiInterfaces.contains($0.interface) }.map {

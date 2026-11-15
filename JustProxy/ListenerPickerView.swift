@@ -15,7 +15,7 @@ struct ListenerPickerView: View {
             header
             ScrollView {
                 VStack(alignment: .leading, spacing: rowSpacing) {
-                    option(title: "自动选择", detail: "优先热点，其次 Wi-Fi、蜂窝", icon: "sparkles")
+                    option(title: String(localized: "Automatic"), detail: String(localized: "Hotspot, then Wi-Fi, then cellular"), icon: "sparkles")
                     ForEach(model.networks.addresses.filter { $0.kind != .cellular }) { listener in
                         option(
                             title: model.listenerTitle(listener), detail: "\(listener.local.address)",
@@ -24,7 +24,7 @@ struct ListenerPickerView: View {
                     }
                     cellularOptions
                     if model.networks.addresses.isEmpty {
-                        Text("暂无可用的监听地址")
+                        Text("No listening address available")
                             .font(.footnote)
                             .foregroundStyle(palette.secondary)
                             .padding(8)
@@ -62,15 +62,15 @@ struct ListenerPickerView: View {
     private var header: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("监听地址")
+                Text("Listen on")
                     .font(.title3.weight(.semibold))
                     .accessibilityAddTraits(.isHeader)
-                Text("客户端连接到 JustProxy 的地址")
+                Text("Address clients use to connect to JustProxy")
                     .font(.caption)
                     .foregroundStyle(palette.secondary)
             }
             Spacer(minLength: 0)
-            Button("关闭") { dismiss() }
+            Button("Close") { dismiss() }
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(palette.accent)
                 .frame(minWidth: 44, minHeight: 44)
@@ -82,7 +82,7 @@ struct ListenerPickerView: View {
         let networks = model.networks
         let dataAddress = networks.cellularAddress
         if hasCellularOptions {
-            Text("蜂窝 · 本机 iPhone")
+            Text("Cellular · This iPhone")
                 .font(.caption)
                 .foregroundStyle(palette.secondary)
                 .accessibilityAddTraits(.isHeader)
@@ -90,14 +90,14 @@ struct ListenerPickerView: View {
                 .padding(.horizontal, 8)
             option(
                 title: model.cellularTitle(networks.dataServiceID),
-                detail: dataAddress.map { "\($0.local.address)" } ?? "当前暂无可用的 IPv4 地址",
+                detail: dataAddress.map { "\($0.local.address)" } ?? String(localized: "No IP address available"),
                 icon: ListenerAddress.Kind.cellular.icon, listener: dataAddress,
-                badge: "数据卡", selectable: dataAddress != nil
+                badge: String(localized: "Data SIM"), selectable: dataAddress != nil
             )
             ForEach(networks.standbyServiceIDs, id: \.self) { serviceID in
                 option(
-                    title: model.cellularTitle(serviceID), detail: "当前未用于蜂窝数据",
-                    icon: ListenerAddress.Kind.cellular.icon, badge: "待机", selectable: false
+                    title: model.cellularTitle(serviceID), detail: String(localized: "Not currently used for cellular data"),
+                    icon: ListenerAddress.Kind.cellular.icon, badge: String(localized: "Standby"), selectable: false
                 )
             }
         }
@@ -166,9 +166,9 @@ extension ListenerAddress.Kind {
 
     var connectionHint: String {
         switch self {
-        case .hotspot: "在已连接热点的设备上设置手动代理"
-        case .wifi: "在同一 Wi-Fi 的设备上设置手动代理"
-        case .cellular: "外部设备能否连入取决于运营商网络"
+        case .hotspot: String(localized: "Set a manual proxy on a device connected to this hotspot")
+        case .wifi: String(localized: "Set a manual proxy on a device on the same Wi-Fi network")
+        case .cellular: String(localized: "Access from other devices depends on your carrier network")
         }
     }
 }
@@ -176,7 +176,7 @@ extension ListenerAddress.Kind {
 extension ProxyModel {
     func listenerTitle(_ listener: ListenerAddress) -> String {
         switch listener.kind {
-        case .hotspot: "热点"
+        case .hotspot: String(localized: "Hotspot")
         case .wifi: "Wi-Fi"
         case .cellular: cellularTitle(listener.dataServiceID)
         }
@@ -184,8 +184,8 @@ extension ProxyModel {
 
     func cellularTitle(_ serviceID: String?) -> String {
         if let serviceID, let generation = networks.cellularGenerations[serviceID], !generation.isEmpty {
-            return "蜂窝 · \(generation)"
+            return String(localized: "Cellular · \(generation)")
         }
-        return "蜂窝"
+        return String(localized: "Cellular")
     }
 }

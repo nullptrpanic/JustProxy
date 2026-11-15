@@ -11,7 +11,7 @@ final class ProxyModel {
         let listener: ListenerAddress
         let port: UInt16
 
-        var text: String { "\(listener.local.address):\(port)" }
+        var text: String { "\(listener.local.address.httpAuthorityHost):\(port)" }
     }
 
     enum State: Equatable {
@@ -22,10 +22,10 @@ final class ProxyModel {
 
         var title: String {
             switch self {
-            case .off: "代理已关闭"
-            case .starting: "正在开启"
-            case .running: "代理运行中"
-            case .stopping: "正在关闭"
+            case .off: String(localized: "Proxy is off")
+            case .starting: String(localized: "Starting…")
+            case .running: String(localized: "Proxy is running")
+            case .stopping: String(localized: "Stopping…")
             }
         }
 
@@ -95,10 +95,10 @@ final class ProxyModel {
     }
 
     func refreshNetworks() {
-        let local = LocalIPv4.addresses()
+        let local = LocalAddress.addresses()
         let cellularInterface = cellularMonitor.currentPath.availableInterfaces.first { $0.type == .cellular }?.name
         let snapshot = ListenerNetworks(
-            local: local, wifiInterfaces: LocalIPv4.wifiInterfaces(in: local), cellularInterface: cellularInterface,
+            local: local, wifiInterfaces: LocalAddress.wifiInterfaces(in: local), cellularInterface: cellularInterface,
             dataServiceID: telephony.dataServiceIdentifier,
             cellularGenerations: (telephony.serviceCurrentRadioAccessTechnology ?? [:]).mapValues(Self.generation)
         )
@@ -123,7 +123,7 @@ final class ProxyModel {
         case .off:
             refreshNetworks()
             guard let listener = networks.resolve(selection) else {
-                failure = selectionWarning ?? "暂无可用的监听地址。请检查当前网络。"
+                failure = selectionWarning ?? String(localized: "No listening address is available. Check your network.")
                 return
             }
             start(listener: listener)
@@ -185,8 +185,14 @@ final class ProxyModel {
     }
 
     private func invalidatedMessage(for listener: ListenerAddress) -> String {
-        let address = listener.kind == .cellular ? "原蜂窝地址" : "原监听地址"
-        return selection == nil ? "\(address)已失效，请重新开启代理。" : "\(address)已失效，请重新选择。"
+        if listener.kind == .cellular {
+            return selection == nil
+                ? String(localized: "The previous cellular address is no longer available. Start the proxy again.")
+                : String(localized: "The previous cellular address is no longer available. Choose another address.")
+        }
+        return selection == nil
+            ? String(localized: "The previous listening address is no longer available. Start the proxy again.")
+            : String(localized: "The previous listening address is no longer available. Choose another address.")
     }
 
     private static func generation(_ technology: String) -> String {

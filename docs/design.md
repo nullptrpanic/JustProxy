@@ -14,7 +14,7 @@ Clients must configure the proxy themselves. Personal Hotspot is optional. JustP
 | --- | --- |
 | `JustProxyApp` and SwiftUI views | App lifecycle integration, proxy controls, network picker, traffic, and privacy presentation |
 | `ProxyModel` | Main-actor observable state, selected listener, session identity, and server event handling |
-| `LocalIPv4` and `InterfaceTypes.h` | Enumerate active IPv4 interfaces and identify infrastructure Wi-Fi interfaces |
+| `LocalAddress` and `InterfaceTypes.h` | Enumerate active IPv4/IPv6 interfaces and identify infrastructure Wi-Fi interfaces |
 | `ListenerNetworks` | Classify and order supported listener choices and resolve a selected address |
 | `ProxyServer` | Own the listener, accepted peers, session counters, and periodic state validation on a serial queue |
 | `ProxyConnection` | Own one client/upstream pair and handle forwarding, completion, half-close, and idle expiry |
@@ -26,7 +26,9 @@ Clients must configure the proxy themselves. Personal Hotspot is optional. JustP
 
 The model transitions through `off`, `starting`, `running`, and `stopping`. A listener-ready event is required before showing the proxy as running. Each start creates a new session identity so delayed events from an older session cannot affect a new one.
 
-The server binds to the selected IPv4 address and interface on port `8080`. Automatic selection prefers a detected hotspot, then infrastructure Wi-Fi, then the active cellular interface. Hotspot detection uses known interface/address heuristics because there is no public Personal Hotspot interface type.
+The server binds to the selected IP address and interface on port `8080`, using `NWEndpoint.Host` for both address families. Automatic selection prefers a detected hotspot, then infrastructure Wi-Fi, then the active cellular interface. On each interface, configured IPv4 choices remain preferred, followed by IPv6 unicast and finally self-assigned IPv4 (`169.254.*`). Hotspot detection uses known interface/address heuristics because there is no public Personal Hotspot interface type.
+
+Unspecified, loopback, multicast, IPv4-mapped IPv6, and IPv6 link-local addresses are excluded from the picker. Link-local IPv6 would require a scope belonging to the client device, so the phone's interface name cannot be shared as a ready-to-use endpoint. IPv6 authorities use brackets around the address; separate server fields in the setup guide show the bare address. Local guide requests compare parsed addresses, including equivalent compressed and expanded IPv6 literals.
 
 The picker excludes loopback addresses and does not classify point-to-point VPN tunnels as Wi-Fi. It does not read SSIDs. Cellular metadata identifies the current data line and radio generation; standby lines do not provide independent listening endpoints.
 
@@ -41,9 +43,11 @@ The server validates that its bound address still exists. An invalid address or 
 5. A CONNECT request receives a successful tunnel response after the upstream connection is ready, then relays bytes in both directions. Early tunnel bytes and TCP half-close are preserved.
 6. Send completions control subsequent reads, bounding queued data. Buffered bytes are drained before terminal I/O conditions close a connection.
 
+Before forwarding a request or acknowledging a CONNECT tunnel, the resolved remote endpoint is checked against the listener to reject hostname aliases that point back to the proxy. OPTIONS and TRACE requests decrement a valid `Max-Forwards` value. A zero value receives a local `501` response because local handling of those methods is unsupported; it is never forwarded.
+
 An ordinary HTTP connection handles one request/response exchange and closes; pipelined bytes are not forwarded as another request. The proxy enforces declared HTTP body boundaries rather than forwarding all received bytes blindly.
 
-Reads use a minimum of one byte and a maximum of 128 KiB. The maximum bounds each receive operation; the connection does not wait to fill 128 KiB before forwarding. Fixed-length body parsing does not retain the entire body as transfers grow.
+Reads use a minimum of one byte and a maximum of 128 KiB. The maximum bounds each receive operation; the connection does not wait to fill 128 KiB before forwarding. Fixed-length and chunked body parsing release consumed data as transfers grow, including when a single HTTP chunk spans many receive operations.
 
 The server accepts up to 128 concurrent connections. Idle connections expire after 20 seconds before upstream readiness or 180 seconds after readiness.
 
@@ -63,6 +67,10 @@ iOS may then suspend or terminate the process. Returning to the foreground valid
 
 ## Public website and project documentation
 
+Native UI and dynamic state/error text use `Localizable.xcstrings`; the Local Network permission description uses `InfoPlist.xcstrings`. Both catalogs provide English and Simplified Chinese. The development language is English, so unsupported language preferences fall back to English. App language selection uses the standard iOS system/per-app preferences without a separate in-app setting.
+
+The bundled guide and public pages select the first supported browser language, or English when none matches. A valid `?lang=en` or `?lang=zh` parameter takes precedence. Language controls and internal website links preserve that selection. Language choice does not depend on location, SIM, VPN, or the proxy host's language. The offline privacy page links to the matching public translation.
+
 The in-app connection guide is bundled at `JustProxy/Proxy/ConnectionGuide.html` and is served by the proxy itself. It is separate from the static support/privacy website in `website/`.
 
 GitHub Pages publishes only `website/` from `master`. The stable support and privacy URLs are also used by App Store Connect and the app. See [website deployment](website-deployment.md) for configuration and verification.
@@ -71,6 +79,6 @@ Project documentation belongs in `docs/` and is written in English. Historical l
 
 ## Verification boundaries
 
-`python3 Tests/proxy_integration.py` compiles native harnesses and checks protocol behavior with real loopback sockets, along with listener-selection and background-task lifecycle cases. All generated files stay under `build/Tests/`.
+`python3 Tests/proxy_integration.py` compiles native harnesses and checks protocol behavior with real IPv4 and IPv6 loopback sockets, along with listener-selection and background-task lifecycle cases. All generated files stay under `build/Tests/`.
 
-Physical-device testing is still needed for carrier reachability, hotspot behavior, actual VPN routing, and iOS background suspension. Loopback tests do not establish those behaviors.
+Physical-device testing is still needed for DNS64/NAT64 Wi-Fi, carrier reachability, hotspot behavior, actual VPN routing, and iOS background suspension. Loopback tests do not establish those behaviors. Follow Apple's [IPv6-only network testing guidance](https://developer.apple.com/support/ipv6/) with cellular data disabled to verify the complete device path.

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>JustProxy · 连接指南</title>
+<title>JustProxy · Connection guide</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2218%22%20fill%3D%22%23141b24%22%2F%3E%3Ccircle%20cx%3D%2226%22%20cy%3D%2232%22%20r%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23bdcce0%22%20stroke-width%3D%223%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%2232%22%20r%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%237d92aa%22%20stroke-width%3D%223%22%2F%3E%3C%2Fsvg%3E">
 <style>
 html { background: #0a0e15; color-scheme: dark; }
@@ -181,47 +181,68 @@ button, summary, a { cursor: pointer; }
     #justproxy-connection-guide-responsive .jp-help-copy { transition: none; }
   }
 
+
+.jp-help-languages { display: flex; align-items: center; gap: 12px; margin-left: auto; font-size: 12px; }
+.jp-help-languages a { color: #9aa6b8; text-decoration: none; }
+.jp-help-languages a[aria-current="true"] { color: #e8edf5; text-decoration: underline; text-underline-offset: 4px; }
 </style>
+<script id="jp-language">
+function justProxyLanguage(search, languages) {
+  const explicit = new URLSearchParams(search).get('lang');
+  if (explicit === 'en' || explicit === 'zh') return explicit;
+  for (const language of languages || []) {
+    if (/^zh(?:-|$)/i.test(language)) return 'zh';
+    if (/^en(?:-|$)/i.test(language)) return 'en';
+  }
+  return 'en';
+}
+
+const justProxySelectedLanguage = justProxyLanguage(location.search, navigator.languages || [navigator.language]);
+document.documentElement.dataset.language = justProxySelectedLanguage;
+document.documentElement.lang = justProxySelectedLanguage === 'zh' ? 'zh-Hans' : 'en';
+
+</script>
 </head>
 <body>
-<div id="justproxy-connection-guide-responsive" lang="zh-CN">
-  <article class="jp-help-page" aria-label="JustProxy 连接指南">
+<div id="justproxy-connection-guide-responsive" lang="en">
+  <article class="jp-help-page" aria-label="JustProxy connection guide">
     <div class="jp-help-inner">
       <header class="jp-help-header">
         <div class="jp-help-brand">
           <span class="jp-help-mark" aria-hidden="true"><span></span><span></span></span>
           <div><strong>JustProxy</strong><span>HTTP PROXY</span></div>
         </div>
+<nav class="jp-help-languages" aria-label="Language"><a data-language-choice="zh" href="?lang=zh" lang="zh-Hans">中文</a><a data-language-choice="en" href="?lang=en" lang="en">English</a></nav>
       </header>
 
       <div class="jp-help-overview">
       <section class="jp-help-intro" aria-labelledby="jp-help-title">
-        <span class="jp-help-status"><span aria-hidden="true"></span>代理地址可达</span>
-        <h1 id="jp-help-title">你的代理，<span>已就绪。</span></h1>
-        <p>将下方地址填入设备的代理设置，<br class="jp-help-mobile-break">开始转发网络请求。</p>
+        <span class="jp-help-status"><span aria-hidden="true"></span>Proxy address is reachable</span>
+        <h1 id="jp-help-title">Your proxy, <span>ready.</span></h1>
+        <p>Enter this address in your device’s proxy settings <br class="jp-help-mobile-break">to start forwarding requests.</p>
       </section>
 
-      <section class="jp-help-address" aria-label="代理连接信息">
-        <div class="jp-help-address-top"><span>连接信息</span><span class="jp-help-protocol">HTTP</span></div>
+      <section class="jp-help-address" aria-label="Proxy connection information">
+        <div class="jp-help-address-top"><span>Connection details</span><span class="jp-help-protocol">HTTP</span></div>
         <dl class="jp-help-values">
-          <div><dt>服务器地址</dt><dd class="jp-help-host">{{HOST}}</dd></div>
-          <div><dt>端口</dt><dd>{{PORT}}</dd></div>
+          <div><dt>Server address</dt><dd class="jp-help-host">{{HOST}}</dd></div>
+          <div><dt>Port</dt><dd>{{PORT}}</dd></div>
         </dl>
         <div class="jp-help-address-bottom">
-          <span class="jp-help-support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3-4 4 4 4M4 7h16m-4 6 4 4-4 4m4-4H4"/></svg>支持 HTTP / HTTPS 请求</span>
-          <button type="button" class="jp-help-copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></svg><span>复制代理地址</span></button>
+          <span class="jp-help-support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3-4 4 4 4M4 7h16m-4 6 4 4-4 4m4-4H4"/></svg>Supports HTTP / HTTPS requests</span>
+          <button type="button" class="jp-help-copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></svg><span>Copy proxy address</span></button>
         </div>
         <div class="jp-help-copy-fallback" hidden>
-          <label for="jp-help-copy-value">请选择并复制地址</label>
-          <input id="jp-help-copy-value" readonly value="{{HOST}}:{{PORT}}" aria-label="可手动复制的代理地址">
+          <label for="jp-help-copy-value">Select and copy the address</label>
+          <input id="jp-help-copy-value" readonly value="{{ENDPOINT}}" aria-label="Proxy address for manual copying">
         </div>
         <span class="jp-help-live" aria-live="polite"></span>
       </section>
       </div>
 
       <section class="jp-help-setup" aria-labelledby="jp-help-setup-title">
-        <div class="jp-help-section-heading"><h2 id="jp-help-setup-title">在设备上配置</h2><span class="jp-help-device-note">选择你的设备</span></div>
-        <div class="jp-help-tabs" role="tablist" aria-label="接入设备类型">
+        <div class="jp-help-section-heading"><h2 id="jp-help-setup-title">Set up your device</h2><span class="jp-help-device-note">Choose your device</span></div>
+        <div class="jp-help-tabs" role="tablist" aria-label="Client device type">
           <button type="button" id="jp-help-tab-mac" role="tab" aria-selected="false" aria-controls="jp-help-steps" data-platform="mac">macOS</button>
           <button type="button" id="jp-help-tab-windows" role="tab" aria-selected="false" aria-controls="jp-help-steps" data-platform="windows">Windows</button>
           <button type="button" id="jp-help-tab-ios" role="tab" aria-selected="false" aria-controls="jp-help-steps" data-platform="ios">iPhone / iPad</button>
@@ -229,32 +250,32 @@ button, summary, a { cursor: pointer; }
         </div>
         <div id="jp-help-steps" class="jp-help-steps" role="tabpanel" aria-labelledby="jp-help-tab-ios" aria-live="polite">
           <ol>
-            <li><span class="jp-help-step-number" aria-hidden="true">01</span><div><h3>打开当前 Wi-Fi 的设置</h3><p>设置 → 无线局域网 → 当前网络右侧的详情按钮。</p></div></li>
-            <li><span class="jp-help-step-number" aria-hidden="true">02</span><div><h3>选择手动代理</h3><p>找到「配置代理」，将配置方式设为「手动」。</p></div></li>
-            <li><span class="jp-help-step-number" aria-hidden="true">03</span><div><h3>填入地址并保存</h3><p>服务器填写 {{HOST}}，端口填写 {{PORT}}。关闭「认证」，然后保存。</p></div></li>
+            <li><span class="jp-help-step-number" aria-hidden="true">01</span><div><h3>Open your Wi-Fi settings</h3><p>Settings → Wi-Fi → the information button next to your connected network.</p></div></li>
+            <li><span class="jp-help-step-number" aria-hidden="true">02</span><div><h3>Choose a manual proxy</h3><p>Find Configure Proxy and select Manual.</p></div></li>
+            <li><span class="jp-help-step-number" aria-hidden="true">03</span><div><h3>Enter the address and save</h3><p>Enter {{HOST}} as the server and {{PORT}} as the port. Turn Authentication off, then save.</p></div></li>
           </ol>
-          <div class="jp-help-step-foot"><span class="jp-help-platform-note">在需要使用代理的设备上操作。</span><a class="jp-help-source" href="https://support.apple.com/en-ie/guide/iphone/iphw5gjwl8k2/27/ios/27" target="_blank" rel="noopener noreferrer">系统设置说明<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 17 10-10M7 7h10v10"/></svg></a></div>
+          <div class="jp-help-step-foot"><span class="jp-help-platform-note">Follow these steps on the device that will use the proxy.</span><a class="jp-help-source" href="https://support.apple.com/en-ie/guide/iphone/iphw5gjwl8k2/27/ios/27" target="_blank" rel="noopener noreferrer">System settings guide<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 17 10-10M7 7h10v10"/></svg></a></div>
         </div>
-        <div class="jp-help-confirm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><div><strong>确认请求已通过代理</strong><p>保存后访问网页，再到 JustProxy 的「流量」页查看是否出现新的连接记录。</p></div></div>
+        <div class="jp-help-confirm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><div><strong>Check that requests use the proxy</strong><p>After saving, visit a webpage and check the Traffic page in JustProxy for new connections.</p></div></div>
       </section>
 
       <section class="jp-help-faq" aria-labelledby="jp-help-faq-title">
-        <h2 id="jp-help-faq-title">你可能还想知道</h2>
+        <h2 id="jp-help-faq-title">Common questions</h2>
         <details>
-          <summary>打开这个页面，就已经在使用代理了吗？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>打开此页说明代理地址可以访问。还需要完成上面的代理设置，支持并遵循该设置的请求才会通过 JustProxy 转发。</p>
+          <summary>Does opening this page mean I am using the proxy?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+          <p>This page confirms that the proxy address is reachable. Complete the proxy setup above to forward requests from clients that support and follow those settings.</p>
         </details>
         <details>
-          <summary>一定要开启个人热点吗？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>不需要。设备也可以通过同一 Wi-Fi 连接，只要网络允许设备互相访问。使用个人热点时，让另一台设备连上热点，并填写 JustProxy 显示的热点地址。</p>
+          <summary>Do I need to turn on Personal Hotspot?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+          <p>No. Devices can use the same Wi-Fi network if it allows them to communicate. When using Personal Hotspot, connect the other device to it and enter the hotspot address shown in JustProxy.</p>
         </details>
         <details>
-          <summary>配置后无法上网，怎么办？<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>回到 JustProxy 确认代理正在运行，并核对当前地址和端口。网络切换后，地址可能改变；部分应用需要单独设置代理。停止使用 JustProxy 后，请关闭设备上的手动代理。</p>
+          <summary>What if I cannot access the internet after setup?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+          <p>Return to JustProxy, check that the proxy is running, and confirm its address and port. The address may change after switching networks, and some apps need separate proxy settings. Turn off the device’s manual proxy when you stop using JustProxy.</p>
         </details>
       </section>
 
-      <footer class="jp-help-footer"><span>JustProxy <span class="jp-help-version">{{VERSION}}</span></span><span>只做简单的代理转发。</span></footer>
+      <footer class="jp-help-footer"><span>JustProxy <span class="jp-help-version">{{VERSION}}</span></span><span>Simple proxy forwarding.</span></footer>
     </div>
   </article>
 </div>
@@ -264,53 +285,147 @@ button, summary, a { cursor: pointer; }
 <script>
 (() => {
   const root = document.getElementById('justproxy-connection-guide-responsive');
-  const page = root.querySelector('.jp-help-page');
+
+  const language = document.documentElement.dataset.language;
+  const translations = {
+  "JustProxy · Connection guide": "JustProxy · 连接指南",
+  "JustProxy connection guide": "JustProxy 连接指南",
+  "Proxy address is reachable": "代理地址可达",
+  "Your proxy,": "你的代理，",
+  "ready.": "已就绪。",
+  "Enter this address in your device’s proxy settings": "将下方地址填入设备的代理设置，",
+  "to start forwarding requests.": "开始转发网络请求。",
+  "Proxy connection information": "代理连接信息",
+  "Connection details": "连接信息",
+  "Server address": "服务器地址",
+  "Port": "端口",
+  "Supports HTTP / HTTPS requests": "支持 HTTP / HTTPS 请求",
+  "Copy proxy address": "复制代理地址",
+  "Select and copy the address": "请选择并复制地址",
+  "Proxy address for manual copying": "可手动复制的代理地址",
+  "Set up your device": "在设备上配置",
+  "Choose your device": "选择你的设备",
+  "Client device type": "接入设备类型",
+  "Open your Wi-Fi settings": "打开当前 Wi-Fi 的设置",
+  "Settings → Wi-Fi → the information button next to your connected network.": "设置 → 无线局域网 → 当前网络右侧的详情按钮。",
+  "Choose a manual proxy": "选择手动代理",
+  "Find Configure Proxy and select Manual.": "找到「配置代理」，将配置方式设为「手动」。",
+  "Enter the address and save": "填入地址并保存",
+  "Enter {{HOST}} as the server and {{PORT}} as the port. Turn Authentication off, then save.": "服务器填写 {{HOST}}，端口填写 {{PORT}}。关闭「认证」，然后保存。",
+  "Follow these steps on the device that will use the proxy.": "在需要使用代理的设备上操作。",
+  "System settings guide": "系统设置说明",
+  "Check that requests use the proxy": "确认请求已通过代理",
+  "After saving, visit a webpage and check the Traffic page in JustProxy for new connections.": "保存后访问网页，再到 JustProxy 的「流量」页查看是否出现新的连接记录。",
+  "Common questions": "你可能还想知道",
+  "Does opening this page mean I am using the proxy?": "打开这个页面，就已经在使用代理了吗？",
+  "This page confirms that the proxy address is reachable. Complete the proxy setup above to forward requests from clients that support and follow those settings.": "打开此页说明代理地址可以访问。还需要完成上面的代理设置，支持并遵循该设置的请求才会通过 JustProxy 转发。",
+  "Do I need to turn on Personal Hotspot?": "一定要开启个人热点吗？",
+  "No. Devices can use the same Wi-Fi network if it allows them to communicate. When using Personal Hotspot, connect the other device to it and enter the hotspot address shown in JustProxy.": "不需要。设备也可以通过同一 Wi-Fi 连接，只要网络允许设备互相访问。使用个人热点时，让另一台设备连上热点，并填写 JustProxy 显示的热点地址。",
+  "What if I cannot access the internet after setup?": "配置后无法上网，怎么办？",
+  "Return to JustProxy, check that the proxy is running, and confirm its address and port. The address may change after switching networks, and some apps need separate proxy settings. Turn off the device’s manual proxy when you stop using JustProxy.": "回到 JustProxy 确认代理正在运行，并核对当前地址和端口。网络切换后，地址可能改变；部分应用需要单独设置代理。停止使用 JustProxy 后，请关闭设备上的手动代理。",
+  "Simple proxy forwarding.": "只做简单的代理转发。",
+  "Edit your connected Wi-Fi network": "编辑当前 Wi-Fi 网络",
+  "Open Settings, select your connected Wi-Fi network, and choose Edit network.": "打开设置，进入已连接的 Wi-Fi 网络，选择编辑网络。",
+  "Set the proxy to Manual": "将代理设为手动",
+  "In Advanced options, find Proxy and select Manual.": "在高级选项中找到「代理」，选择「手动」。",
+  "Enter {{HOST}} as the proxy hostname and {{PORT}} as the proxy port, then save.": "代理主机名填写 {{HOST}}，代理端口填写 {{PORT}}，然后保存。",
+  "Menu names may vary between device brands.": "不同品牌的菜单名称可能略有差异。",
+  "Open network proxy settings": "打开网络代理设置",
+  "System Settings → Network → your current connection → Details → Proxies.": "系统设置 → 网络 → 当前网络 → 详细信息 → 代理。",
+  "Turn on web proxies": "开启网页代理",
+  "Turn on Web Proxy (HTTP) and Secure Web Proxy (HTTPS).": "开启「网页代理（HTTP）」和「安全网页代理（HTTPS）」。",
+  "Use the same server and port for both": "填写相同的服务器与端口",
+  "For both entries, use server {{HOST}} and port {{PORT}}. Leave password authentication off, then confirm.": "两项均填写服务器 {{HOST}}、端口 {{PORT}}，不开启密码认证，然后确认。",
+  "Select the Wi-Fi or Ethernet connection you are using.": "选择当前使用的 Wi-Fi 或以太网连接。",
+  "Open system proxy settings": "打开系统代理设置",
+  "Settings → Network & Internet → Proxy.": "设置 → 网络和 Internet → 代理。",
+  "Enable a manual proxy": "开启手动代理",
+  "Under Manual proxy setup, turn on Use a proxy server.": "在「手动设置代理」中，开启「使用代理服务器」。",
+  "Enter {{HOST}} as the proxy IP address and {{PORT}} as the port, then save.": "代理 IP 地址填写 {{HOST}}，端口填写 {{PORT}}，然后保存。",
+  "For Windows 10 / 11.": "适用于 Windows 10 / 11。",
+  "Find proxy settings": "找到代理设置",
+  "Open the client device’s network settings or its app-specific proxy settings.": "打开接入设备的网络设置，或应用内的代理设置。",
+  "Choose a manual HTTP proxy": "选择手动 HTTP 代理",
+  "Choose HTTP as the proxy type and use manual configuration.": "将代理类型设为 HTTP，并使用手动配置。",
+  "Enter the address and port": "填写地址和端口",
+  "Use server {{HOST}} and port {{PORT}}. No username or password is required.": "服务器填写 {{HOST}}，端口填写 {{PORT}}。无需用户名和密码。",
+  "Select a device above for its detailed steps.": "也可以选择上方设备，查看对应的详细步骤。",
+  "Selected: ": "已选择 ",
+  "Your device · ": "当前设备 · ",
+  "Copied": "已复制",
+  "Copied proxy address ": "已复制代理地址 ",
+  "Copy the selected proxy address manually.": "请手动复制已选中的代理地址。",
+  "Selected:": "已选择",
+  "Your device ·": "当前设备 ·",
+  "Copied proxy address": "已复制代理地址"
+};
+  const t = english => language === 'zh' ? (translations[english] ?? english) : english;
+  if (language === 'zh') {
+    document.title = t(document.title);
+    const nodes = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    while (nodes.nextNode()) {
+      const node = nodes.currentNode;
+      if (['SCRIPT', 'STYLE'].includes(node.parentElement?.tagName)) continue;
+      const key = node.nodeValue.trim();
+      if (Object.prototype.hasOwnProperty.call(translations, key)) {
+        node.nodeValue = node.nodeValue.replace(key, translations[key]);
+      }
+    }
+    root.querySelectorAll('[aria-label]').forEach(element => {
+      element.setAttribute('aria-label', t(element.getAttribute('aria-label')));
+    });
+  }
+  root.lang = language === 'zh' ? 'zh-Hans' : 'en';
+  root.querySelectorAll('[data-language-choice]').forEach(link => {
+    if (link.dataset.languageChoice === language) link.setAttribute('aria-current', 'true');
+  });
+
   const panel = root.querySelector('#jp-help-steps');
   const tabs = Array.from(root.querySelectorAll('[data-platform]'));
   const guides = {
     ios: {
       steps: [
-        ['打开当前 Wi-Fi 的设置', '设置 → 无线局域网 → 当前网络右侧的详情按钮。'],
-        ['选择手动代理', '找到「配置代理」，将配置方式设为「手动」。'],
-        ['填入地址并保存', '服务器填写 {{HOST}}，端口填写 {{PORT}}。关闭「认证」，然后保存。']
+        [t("Open your Wi-Fi settings"), t("Settings → Wi-Fi → the information button next to your connected network.")],
+        [t("Choose a manual proxy"), t("Find Configure Proxy and select Manual.")],
+        [t("Enter the address and save"), t("Enter {{HOST}} as the server and {{PORT}} as the port. Turn Authentication off, then save.")]
       ],
-      note: '在需要使用代理的设备上操作。',
+      note: t("Follow these steps on the device that will use the proxy."),
       source: 'https://support.apple.com/en-ie/guide/iphone/iphw5gjwl8k2/27/ios/27'
     },
     android: {
       steps: [
-        ['编辑当前 Wi-Fi 网络', '打开设置，进入已连接的 Wi-Fi 网络，选择编辑网络。'],
-        ['将代理设为手动', '在高级选项中找到「代理」，选择「手动」。'],
-        ['填入地址并保存', '代理主机名填写 {{HOST}}，代理端口填写 {{PORT}}，然后保存。']
+        [t("Edit your connected Wi-Fi network"), t("Open Settings, select your connected Wi-Fi network, and choose Edit network.")],
+        [t("Set the proxy to Manual"), t("In Advanced options, find Proxy and select Manual.")],
+        [t("Enter the address and save"), t("Enter {{HOST}} as the proxy hostname and {{PORT}} as the proxy port, then save.")]
       ],
-      note: '不同品牌的菜单名称可能略有差异。',
+      note: t("Menu names may vary between device brands."),
       source: 'https://support.google.com/pixelphone/answer/9655181?hl=en-GB'
     },
     mac: {
       steps: [
-        ['打开网络代理设置', '系统设置 → 网络 → 当前网络 → 详细信息 → 代理。'],
-        ['开启网页代理', '开启「网页代理（HTTP）」和「安全网页代理（HTTPS）」。'],
-        ['填写相同的服务器与端口', '两项均填写服务器 {{HOST}}、端口 {{PORT}}，不开启密码认证，然后确认。']
+        [t("Open network proxy settings"), t("System Settings → Network → your current connection → Details → Proxies.")],
+        [t("Turn on web proxies"), t("Turn on Web Proxy (HTTP) and Secure Web Proxy (HTTPS).")],
+        [t("Use the same server and port for both"), t("For both entries, use server {{HOST}} and port {{PORT}}. Leave password authentication off, then confirm.")]
       ],
-      note: '选择当前使用的 Wi-Fi 或以太网连接。',
+      note: t("Select the Wi-Fi or Ethernet connection you are using."),
       source: 'https://support.apple.com/en-gb/guide/mac-help/mchlp2591/mac'
     },
     windows: {
       steps: [
-        ['打开系统代理设置', '设置 → 网络和 Internet → 代理。'],
-        ['开启手动代理', '在「手动设置代理」中，开启「使用代理服务器」。'],
-        ['填入地址并保存', '代理 IP 地址填写 {{HOST}}，端口填写 {{PORT}}，然后保存。']
+        [t("Open system proxy settings"), t("Settings → Network & Internet → Proxy.")],
+        [t("Enable a manual proxy"), t("Under Manual proxy setup, turn on Use a proxy server.")],
+        [t("Enter the address and save"), t("Enter {{HOST}} as the proxy IP address and {{PORT}} as the port, then save.")]
       ],
-      note: '适用于 Windows 10 / 11。',
+      note: t("For Windows 10 / 11."),
       source: 'https://support.microsoft.com/en-us/windows/experience/connectivity-networking/use-a-proxy-server-in-windows'
     },
     generic: {
       steps: [
-        ['找到代理设置', '打开接入设备的网络设置，或应用内的代理设置。'],
-        ['选择手动 HTTP 代理', '将代理类型设为 HTTP，并使用手动配置。'],
-        ['填写地址和端口', '服务器填写 {{HOST}}，端口填写 {{PORT}}。无需用户名和密码。']
+        [t("Find proxy settings"), t("Open the client device’s network settings or its app-specific proxy settings.")],
+        [t("Choose a manual HTTP proxy"), t("Choose HTTP as the proxy type and use manual configuration.")],
+        [t("Enter the address and port"), t("Use server {{HOST}} and port {{PORT}}. No username or password is required.")]
       ],
-      note: '也可以选择上方设备，查看对应的详细步骤。',
+      note: t("Select a device above for its detailed steps."),
       source: null
     }
   };
@@ -332,7 +447,7 @@ button, summary, a { cursor: pointer; }
     const guide = guides[selected];
     tabs.forEach(tab => tab.setAttribute('aria-selected', String(tab.dataset.platform === selected)));
     panel.setAttribute('aria-labelledby', selected === 'generic' ? 'jp-help-setup-title' : 'jp-help-tab-' + selected);
-    root.querySelector('.jp-help-device-note').textContent = selected === 'generic' ? '选择你的设备' : (mode === 'manual' ? '已选择 ' : '当前设备 · ') + names[selected];
+    root.querySelector('.jp-help-device-note').textContent = selected === 'generic' ? t("Choose your device") : (mode === 'manual' ? t("Selected: ") : t("Your device · ")) + names[selected];
     Array.from(panel.querySelectorAll('li')).forEach((step, index) => {
       step.querySelector('h3').textContent = guide.steps[index][0];
       step.querySelector('p').textContent = guide.steps[index][1];
@@ -365,7 +480,7 @@ button, summary, a { cursor: pointer; }
   const live = root.querySelector('.jp-help-live');
   let copyTimer;
   copyButton.addEventListener('click', async () => {
-    const address = '{{HOST}}:{{PORT}}';
+    const address = '{{ENDPOINT}}';
     let copied = false;
     try {
       if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(address); copied = true; }
@@ -379,13 +494,13 @@ button, summary, a { cursor: pointer; }
     clearTimeout(copyTimer);
     if (copied) {
       fallback.hidden = true;
-      copyLabel.textContent = '已复制';
-      live.textContent = '已复制代理地址 ' + address;
+      copyLabel.textContent = t("Copied");
+      live.textContent = t("Copied proxy address ") + address;
       copyButton.focus();
-      copyTimer = setTimeout(() => { copyLabel.textContent = '复制代理地址'; }, 2200);
+      copyTimer = setTimeout(() => { copyLabel.textContent = t("Copy proxy address"); }, 2200);
     } else {
-      copyLabel.textContent = '复制代理地址';
-      live.textContent = '请手动复制已选中的代理地址。';
+      copyLabel.textContent = t("Copy proxy address");
+      live.textContent = t("Copy the selected proxy address manually.");
     }
   });
 
