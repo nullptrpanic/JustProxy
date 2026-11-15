@@ -109,6 +109,11 @@ final class ProxyConnection {
     }
 
     private func connect(_ request: HTTPProxyRequest, eof: Bool) throws {
+        if request.maxForwards == 0 {
+            // Act as the final recipient; local OPTIONS/TRACE handling is unsupported.
+            reject(.unsupported)
+            return
+        }
         if NWEndpoint.Host(request.host) == listenAddress, request.port == listenPort {
             guard request.path != nil else { throw HTTPMessageError.malformed }
             if request.method == "GET" || request.method == "HEAD" {
@@ -132,6 +137,14 @@ final class ProxyConnection {
             guard let self, let destination, !self.finished, !self.closing else { return }
             switch state {
             case .ready where !self.upstreamReady:
+                // Check the resolved peer before forwarding headers or acknowledging a tunnel.
+                if let endpoint = destination.currentPath?.remoteEndpoint,
+                    case .hostPort(let host, let port) = endpoint,
+                    port.rawValue == self.listenPort,
+                    host.ipAddress?.rawValue == self.listenAddress.ipAddress?.rawValue {
+                    self.reject(.badRequest)
+                    return
+                }
                 // A terminal state can precede delivery of buffered data and the read-side EOF.
                 destination.stateUpdateHandler = nil
                 self.upstreamReady = true

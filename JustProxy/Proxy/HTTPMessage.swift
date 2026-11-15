@@ -89,7 +89,8 @@ struct HTTPMessageHead {
         start: String,
         host: String? = nil,
         framing: HTTPBody.Framing,
-        close: Bool
+        close: Bool,
+        maxForwards: UInt64? = nil
     ) -> Data {
         let options = connectionOptions
         var data = Data(start.utf8)
@@ -100,6 +101,8 @@ struct HTTPMessageHead {
         for field in fields where !Self.hopFields.contains(field.name) && !options.contains(field.name) {
             switch field.name {
             case "host" where host != nil, "content-length", "transfer-encoding":
+                continue
+            case "max-forwards" where maxForwards != nil:
                 continue
             case "trailer" where framing != .chunked:
                 continue
@@ -116,6 +119,7 @@ struct HTTPMessageHead {
         case .none, .untilEOF:
             break
         }
+        if let maxForwards { data.append(Data("Max-Forwards: \(maxForwards)\r\n".utf8)) }
         if close { data.append(Data("Connection: close\r\n".utf8)) }
         data.append(lineEnd)
         return data
@@ -137,6 +141,7 @@ struct HTTPProxyRequest {
     let path: String?
     let forwardHead: Data?
     let framing: HTTPBody.Framing
+    let maxForwards: UInt64?
 
     init(_ head: HTTPMessageHead, localEndpoint: (address: NWEndpoint.Host, port: UInt16)? = nil) throws {
         let parts = head.start.split(separator: " ", omittingEmptySubsequences: false)
@@ -151,6 +156,13 @@ struct HTTPProxyRequest {
         }
 
         framing = try head.framing(defaultBody: .none)
+        let limits = head.values(for: "max-forwards")
+        if method == "OPTIONS" || method == "TRACE", !limits.isEmpty {
+            guard limits.count == 1, let limit = decimal(limits[0]) else { throw HTTPMessageError.malformed }
+            maxForwards = limit
+        } else {
+            maxForwards = nil
+        }
         if method == "CONNECT" {
             guard framing == .none || framing == .fixed(0) else { throw HTTPMessageError.malformed }
             (host, port) = try Self.destination(target, defaultPort: nil)
@@ -192,7 +204,8 @@ struct HTTPProxyRequest {
         }
         path = requestPath
         forwardHead = head.forwarded(
-            start: "\(method) \(requestPath) \(parts[2])", host: authority, framing: framing, close: true)
+            start: "\(method) \(requestPath) \(parts[2])", host: authority, framing: framing, close: true,
+            maxForwards: maxForwards.map { $0 == 0 ? 0 : $0 - 1 })
     }
 
     private static func destination(_ authority: String, defaultPort: UInt16?) throws -> (String, UInt16) {
@@ -322,6 +335,8 @@ struct HTTPBody {
                 break parse
             }
         }
+        // An empty Data slice can still retain every consumed byte in a large chunk.
+        if pending.isEmpty { pending = Data() }
         if eof, !finished { throw HTTPMessageError.malformed }
         return output
     }

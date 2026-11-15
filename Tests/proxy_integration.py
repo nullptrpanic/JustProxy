@@ -209,6 +209,54 @@ class ProxyIntegrationTests(unittest.TestCase):
         self.assertEqual(receive_all(client),
                          b"HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
 
+    def test_hostname_self_target_does_not_forward_or_open_a_tunnel(self):
+        aliases = [("localhost", (400, 400, 400))]
+        if self.family == socket.AF_INET:
+            # Network normalizes mapped literals to IPv4; preserve local guide handling.
+            aliases.append(("[::ffff:127.0.0.1]", (405, 200, 400)))
+        for alias, statuses in aliases:
+            target = f"{alias}:{self.port}".encode()
+            requests = (b"OPTIONS *", b"GET http://" + target + b"/", b"CONNECT " + target)
+            for request, status in zip(requests, statuses):
+                with self.subTest(request=request):
+                    client = self.client()
+                    client.sendall(request + b" HTTP/1.1\r\nHost: " + target + b"\r\n\r\n")
+                    self.assertTrue(receive_until(client, b"\r\n\r\n").startswith(f"HTTP/1.1 {status} ".encode()))
+        self.assertEqual(self.stop_proxy(), "STOPPED 0 0 0 -")
+
+    def test_options_and_trace_with_zero_max_forwards_are_answered_locally(self):
+        for method in (b"OPTIONS", b"TRACE"):
+            with self.subTest(method=method):
+                client = self.client()
+                client.sendall(method + b" http://" + self.target + b"/ HTTP/1.1\r\nHost: " + self.target
+                               + b"\r\nMax-Forwards: 0\r\n\r\n")
+                self.assertFalse(select.select([self.origin], [], [], 0.1)[0], "Zero-hop request reached the origin")
+                self.assertTrue(receive_all(client).startswith(b"HTTP/1.1 501 "))
+        self.assertEqual(self.stop_proxy(), "STOPPED 0 0 0 -")
+
+    def test_options_and_trace_decrement_max_forwards(self):
+        for method in (b"OPTIONS", b"TRACE"):
+            with self.subTest(method=method):
+                client = self.client()
+                client.sendall(method + b" http://" + self.target + b"/ HTTP/1.1\r\nHost: " + self.target
+                               + b"\r\nMax-Forwards: 2\r\n\r\n")
+                upstream = self.upstream()
+                request = receive_until(upstream, b"\r\n\r\n")
+                self.assertIn(b"\r\nMax-Forwards: 1\r\n", request)
+                self.assertNotIn(b"\r\nMax-Forwards: 2\r\n", request)
+                upstream.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n")
+                self.assertTrue(receive_all(client).startswith(b"HTTP/1.1 200 "))
+
+    def test_invalid_or_repeated_max_forwards_is_rejected(self):
+        for limit in (b"-1", b"invalid", b"18446744073709551616", b"1\r\nMax-Forwards: 2"):
+            with self.subTest(limit=limit):
+                client = self.client()
+                client.sendall(b"OPTIONS http://" + self.target + b"/ HTTP/1.1\r\nHost: " + self.target
+                               + b"\r\nMax-Forwards: " + limit + b"\r\n\r\n")
+                self.assertTrue(receive_all(client).startswith(b"HTTP/1.1 400 "))
+        self.assertFalse(select.select([self.origin], [], [], 0.1)[0])
+        self.assertEqual(self.stop_proxy(), "STOPPED 0 0 0 -")
+
     def test_rejects_conflicting_body_framing(self):
         client = self.client()
         client.sendall(b"POST http://" + self.target + b"/ HTTP/1.1\r\nHost: " + self.target
@@ -352,6 +400,15 @@ class HTTPBodyTests(unittest.TestCase):
     def test_fixed_body_preserves_fragments_and_excludes_pipelined_bytes(self):
         output = subprocess.check_output([self.binary, "fragments"], text=True, timeout=5).splitlines()
         self.assertEqual(output, ["0 false", "ab false", "cde true", "0 true"])
+
+    def test_large_single_chunk_memory_stays_bounded_as_transfer_grows(self):
+        peaks = []
+        for mib, wire_bytes in [(1, 1048591), (128, 134217744)]:
+            output = subprocess.check_output([self.binary, "chunked-stream", str(mib)], text=True, timeout=10).split()
+            self.assertEqual(output[:2], [str(wire_bytes), "true"])
+            peaks.append(int(output[2]))
+        self.assertLess(peaks[1] - peaks[0], 32 * 1024 * 1024,
+                        "A single chunk must not retain already-forwarded payload as it grows")
 
     def test_fixed_body_rejects_early_eof(self):
         output = subprocess.check_output([self.binary, "early-eof"], text=True, timeout=5).strip()
