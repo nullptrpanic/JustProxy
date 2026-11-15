@@ -1,0 +1,14 @@
+{
+  "locale": "en-CA",
+  "appInformation": {
+    "name": "JustProxy",
+    "subtitle": "HTTP Proxy & Traffic Monitor",
+    "privacyPolicyUrl": "https://nullptrpanic.github.io/JustProxy/privacy/?lang=en"
+  },
+  "versionInformation": {
+    "description": "Run an HTTP proxy server on your iPhone and view the traffic passing through it. Connect a computer, phone, or application that supports an HTTP proxy using the address and port shown in JustProxy.\n\nThe app interface and privacy information support English and Simplified Chinese, following your system or per-app language preference. The built-in setup guide follows the client browser’s language, with a manual language switch.\n\nFEATURES\n• Start or stop the proxy with one control, and view or copy its address.\n• Choose an available listening address automatically or manually.\n• Forward HTTP requests and relay HTTPS through CONNECT tunnels.\n• View session upload and download totals, plus the destination, port, and traffic for recent connections.\n• Open the proxy address in a browser for a setup guide tailored to phones and computers.\n\nGET CONNECTED\n1. Connect your iPhone and client to a network that allows them to communicate.\n2. Choose a listening address in JustProxy and start the proxy.\n3. Enter the displayed address and port in the client's HTTP proxy settings.\n4. When finished, stop the proxy and turn off the client's manual proxy setting.\n\nNETWORK AND RUNTIME\nUse a reachable Wi-Fi or Personal Hotspot network. Personal Hotspot is optional. Clients must support and be configured to use an HTTP proxy; starting JustProxy does not automatically forward all traffic from other devices.\n\niOS controls background execution. Keep JustProxy in the foreground for sustained use. Provide proxy access only to trusted devices on trusted networks.\n\nHTTPS CONNECT relays tunnel data without installing certificates or decrypting HTTPS content.\n\nNo account or sign-in is required.",
+    "keywords": "https,connect,lan,wifi,hotspot,server,forwarding,tunnel,bandwidth,upload,download,network,local",
+    "supportUrl": "https://nullptrpanic.github.io/JustProxy/?lang=en",
+    "whatsNew": "Added English and Simplified Chinese throughout the app, including proxy status, traffic statistics, local network permission information, and privacy details. The built-in setup guide now follows your browser language and supports manual language switching."
+  }
+}

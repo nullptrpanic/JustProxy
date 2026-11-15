@@ -43,9 +43,11 @@ The server validates that its bound address still exists. An invalid address or 
 5. A CONNECT request receives a successful tunnel response after the upstream connection is ready, then relays bytes in both directions. Early tunnel bytes and TCP half-close are preserved.
 6. Send completions control subsequent reads, bounding queued data. Buffered bytes are drained before terminal I/O conditions close a connection.
 
+Before forwarding a request or acknowledging a CONNECT tunnel, the resolved remote endpoint is checked against the listener to reject hostname aliases that point back to the proxy. OPTIONS and TRACE requests decrement a valid `Max-Forwards` value. A zero value receives a local `501` response because local handling of those methods is unsupported; it is never forwarded.
+
 An ordinary HTTP connection handles one request/response exchange and closes; pipelined bytes are not forwarded as another request. The proxy enforces declared HTTP body boundaries rather than forwarding all received bytes blindly.
 
-Reads use a minimum of one byte and a maximum of 128 KiB. The maximum bounds each receive operation; the connection does not wait to fill 128 KiB before forwarding. Fixed-length body parsing does not retain the entire body as transfers grow.
+Reads use a minimum of one byte and a maximum of 128 KiB. The maximum bounds each receive operation; the connection does not wait to fill 128 KiB before forwarding. Fixed-length and chunked body parsing release consumed data as transfers grow, including when a single HTTP chunk spans many receive operations.
 
 The server accepts up to 128 concurrent connections. Idle connections expire after 20 seconds before upstream readiness or 180 seconds after readiness.
 
@@ -64,6 +66,10 @@ Starting the proxy requests a finite UIKit background task. Switching apps does 
 iOS may then suspend or terminate the process. Returning to the foreground validates the listener and renews the finite background task. This design does not guarantee continuous background availability.
 
 ## Public website and project documentation
+
+Native UI and dynamic state/error text use `Localizable.xcstrings`; the Local Network permission description uses `InfoPlist.xcstrings`. Both catalogs provide English and Simplified Chinese. The development language is English, so unsupported language preferences fall back to English. App language selection uses the standard iOS system/per-app preferences without a separate in-app setting.
+
+The bundled guide and public pages select the first supported browser language, or English when none matches. A valid `?lang=en` or `?lang=zh` parameter takes precedence. Language controls and internal website links preserve that selection. Language choice does not depend on location, SIM, VPN, or the proxy host's language. The offline privacy page links to the matching public translation.
 
 The in-app connection guide is bundled at `JustProxy/Proxy/ConnectionGuide.html` and is served by the proxy itself. It is separate from the static support/privacy website in `website/`.
 

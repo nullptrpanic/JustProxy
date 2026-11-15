@@ -7,29 +7,29 @@ struct TrafficView: View {
     let palette: ProxyPalette
 
     private var sessionTitle: String {
-        hasSession && !current ? "上次会话" : "本次会话"
+        hasSession && !current ? String(localized: "Previous session") : String(localized: "Current session")
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("流量")
+                Text("Traffic")
                     .font(.title.weight(.semibold))
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
             }
             summary(traffic)
             HStack {
-                Text("最近连接").font(.headline).accessibilityAddTraits(.isHeader)
+                Text("Recent connections").font(.headline).accessibilityAddTraits(.isHeader)
                 Spacer()
-                Text("\(traffic.connections.count) 条")
+                Text("\(traffic.connections.count) connections")
                     .font(.footnote)
                     .foregroundStyle(palette.secondary)
             }
             .padding(.top, 4)
 
             if traffic.connections.isEmpty {
-                Text("暂无连接记录，设备通过代理访问网络后会显示在这里。")
+                Text("Connections appear here when a device accesses the network through your proxy.")
                     .font(.footnote)
                     .foregroundStyle(palette.secondary)
                     .padding(.vertical, 12)
@@ -58,13 +58,13 @@ struct TrafficView: View {
                 .foregroundStyle(palette.secondary)
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 14) {
-                    metric("上传", icon: "arrow.up.right", bytes: traffic.uploaded)
+                    metric("Upload", icon: "arrow.up.right", bytes: traffic.uploaded)
                     Rectangle().fill(palette.border).frame(width: 1, height: 42)
-                    metric("下载", icon: "arrow.down.left", bytes: traffic.downloaded)
+                    metric("Download", icon: "arrow.down.left", bytes: traffic.downloaded)
                 }
                 VStack(alignment: .leading, spacing: 12) {
-                    metric("上传", icon: "arrow.up.right", bytes: traffic.uploaded)
-                    metric("下载", icon: "arrow.down.left", bytes: traffic.downloaded)
+                    metric("Upload", icon: "arrow.up.right", bytes: traffic.uploaded)
+                    metric("Download", icon: "arrow.down.left", bytes: traffic.downloaded)
                 }
             }
         }
@@ -94,7 +94,7 @@ struct TrafficView: View {
                 Text(connection.host)
                     .font(.subheadline.weight(.semibold))
                     .lineLimit(2)
-                Text("\(connection.method) · \(connection.port)")
+                Text(verbatim: "\(connection.method) · \(connection.port)")
                     .font(.caption.monospaced())
                     .foregroundStyle(palette.secondary)
             }

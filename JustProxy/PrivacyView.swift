@@ -4,6 +4,11 @@ struct PrivacyView: View {
     let palette: ProxyPalette
     @Environment(\.dismiss) private var dismiss
 
+    private var policyURL: URL {
+        let language = Bundle.main.preferredLocalizations.first?.hasPrefix("zh") == true ? "zh" : "en"
+        return URL(string: "https://nullptrpanic.github.io/JustProxy/privacy/?lang=" + language)!
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -13,33 +18,33 @@ struct PrivacyView: View {
                             .font(.system(size: 30, weight: .light))
                             .foregroundStyle(palette.accent)
                             .accessibilityHidden(true)
-                        Text("本地统计，按需转发")
+                        Text("Local stats. On-demand forwarding.")
                             .font(.title2.weight(.semibold))
-                        Text("JustProxy 无需注册或登录，不集成广告或第三方统计 SDK，也不向开发者服务器上传代理流量或连接记录。")
+                        Text("JustProxy requires no account or sign-in, includes no ads or third-party analytics SDKs, and does not upload proxy traffic or connection records to developer-operated servers.")
                             .font(.subheadline)
                             .foregroundStyle(palette.secondary)
                     }
 
-                    section("代理请求", text: "开启代理后，JustProxy 在你的 iPhone 上处理客户端请求，并转发到请求指定的目标服务器。目标服务和所用网络可能按各自的隐私政策处理这些请求。HTTPS CONNECT 使用隧道转发，JustProxy 不安装用于解密 HTTPS 的证书。")
-                    section("会话数据", text: "上传、下载字节数及最近 50 条连接的目标主机、端口、请求方式和流量仅保存在本机内存中，不写入持久化文件，也不上传给开发者。新代理会话会重新统计；应用进程结束后，这些内存记录随之释放。")
-                    section("网络权限", text: "应用读取本机可用网络地址，以提供监听地址选择。本地网络权限用于访问局域网目标。JustProxy 不申请定位权限，也不读取 Wi-Fi 名称。")
-                    section("停止与清除", text: "你可以随时点击主界面的大按钮关闭代理。结束应用进程可清除内存中的会话记录。应用没有开发者服务器上的账号或个人档案需要删除。")
+                    section("Proxy requests", text: "When the proxy is running, JustProxy processes client requests on your iPhone and forwards them to their requested destinations. Destination services and networks may process these requests under their own privacy policies. HTTPS CONNECT traffic is relayed through tunnels; JustProxy does not install certificates to decrypt HTTPS.")
+                    section("Session data", text: "Upload and download totals, and the destination host, port, request method, and traffic for up to 50 recent connections, are kept only in device memory. They are not written to persistent files or uploaded to the developer. Statistics reset for a new proxy session; these records are released when the app process ends.")
+                    section("Network access", text: "The app reads available local network addresses so you can choose a listening address. Local Network permission is used to reach destinations on your local network. JustProxy does not request location access or read Wi-Fi network names.")
+                    section("Stopping and clearing data", text: "You can stop the proxy at any time using the main power button. Ending the app process clears its session records from memory. There is no account or personal profile stored on developer-operated servers to delete.")
 
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("政策与联系")
+                        Text("Policy and contact")
                             .font(.headline)
                             .accessibilityAddTraits(.isHeader)
-                        Link(destination: URL(string: "https://nullptrpanic.github.io/JustProxy/privacy/")!) {
-                            Label("查看网页版隐私政策", systemImage: "arrow.up.right.square")
+                        Link(destination: policyURL) {
+                            Label("Read the privacy policy online", systemImage: "arrow.up.right.square")
                         }
                         Link(destination: URL(string: "mailto:liyufeiat010@gmail.com")!) {
                             Label("liyufeiat010@gmail.com", systemImage: "envelope")
                         }
                         .textSelection(.enabled)
-                        Text("如主动通过邮件联系我们，邮件内容仅用于处理你的咨询。网页版政策由 GitHub Pages 托管，访问网页时适用其托管服务隐私政策。")
+                        Text("If you contact us by email, your message is used only to handle your inquiry. The online policy is hosted by GitHub Pages; its hosting privacy policy applies when you visit the website.")
                             .font(.footnote)
                             .foregroundStyle(palette.secondary)
-                        Text("更新日期：2026 年 11 月 11 日")
+                        Text("Last updated: November 15, 2026")
                             .font(.caption)
                             .foregroundStyle(palette.secondary)
                     }
@@ -52,20 +57,20 @@ struct PrivacyView: View {
             }
             .foregroundStyle(palette.text)
             .background(palette.background)
-            .navigationTitle("隐私说明")
+            .navigationTitle("Privacy")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(palette.surface, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("完成") { dismiss() }
+                    Button("Done") { dismiss() }
                         .tint(palette.accent)
                 }
             }
         }
     }
 
-    private func section(_ title: String, text: String) -> some View {
+    private func section(_ title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 9) {
             Text(title)
                 .font(.headline)

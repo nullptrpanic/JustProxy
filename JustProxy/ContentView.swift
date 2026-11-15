@@ -67,7 +67,7 @@ struct ContentView: View {
                     .font(.title2.weight(.bold))
                     .tracking(-1)
                     .accessibilityAddTraits(.isHeader)
-                Text("HTTP 代理")
+                Text("HTTP Proxy")
                     .font(.caption)
                     .foregroundStyle(palette.secondary)
             }
@@ -82,7 +82,7 @@ struct ContentView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("隐私说明")
+            .accessibilityLabel("Privacy")
         }
         .padding(.horizontal, 22)
         .padding(.top, 16)
@@ -91,8 +91,8 @@ struct ContentView: View {
 
     private var tabBar: some View {
         HStack(spacing: 10) {
-            tab(.proxy, title: "代理")
-            tab(.traffic, title: "流量")
+            tab(.proxy, title: "Proxy")
+            tab(.traffic, title: "Traffic")
         }
         .padding(.horizontal, 20)
         .padding(.top, 6)
@@ -181,7 +181,7 @@ private struct ProxyHomeView: View {
             }
             .buttonStyle(.plain)
             .disabled(model.state.isBusy || (!running && model.selectionWarning != nil))
-            .accessibilityLabel(running ? "关闭代理" : "开启代理")
+            .accessibilityLabel(running ? String(localized: "Stop proxy") : String(localized: "Start proxy"))
             .accessibilityValue(model.state.title)
 
             HStack(spacing: 8) {
@@ -223,13 +223,13 @@ private struct ProxyHomeView: View {
     }
 
     private var listenerPickerButton: some View {
-        let title = model.selection.map(model.listenerTitle) ?? "自动选择"
+        let title = model.selection.map(model.listenerTitle) ?? String(localized: "Automatic")
         return Button {
             model.refreshNetworks()
             showingListenerPicker = true
         } label: {
             HStack(spacing: 8) {
-                Text("监听地址")
+                Text("Listen on")
                     .foregroundStyle(palette.text)
                 Spacer(minLength: 8)
                 Text(title)
@@ -246,7 +246,7 @@ private struct ProxyHomeView: View {
             .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(palette.border) }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("监听地址")
+        .accessibilityLabel("Listen on")
         .accessibilityValue(title)
     }
 
@@ -355,7 +355,7 @@ private struct ProxyHomeView: View {
     private func addressText(_ address: String, source: String, icon: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 7) {
-                Text("代理地址")
+                Text("Proxy address")
                     .foregroundStyle(palette.secondary)
                     .fixedSize()
                 Label(source, systemImage: icon)
@@ -376,14 +376,14 @@ private struct ProxyHomeView: View {
             UIPasteboard.general.string = address
             copied = true
         } label: {
-            Text(copied ? "已复制" : "复制")
+            Text(copied ? String(localized: "Copied") : String(localized: "Copy"))
                 .font(.caption.weight(.semibold))
                 .frame(minWidth: 60, minHeight: 44)
                 .padding(.horizontal, 4)
                 .background(palette.copySurface, in: .rect(cornerRadius: 10))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(copied ? "代理地址已复制" : "复制代理地址")
+        .accessibilityLabel(copied ? String(localized: "Proxy address copied") : String(localized: "Copy proxy address"))
     }
 }
 

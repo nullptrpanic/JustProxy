@@ -54,7 +54,7 @@ final class ProxyServer: @unchecked Sendable {
         queue.async {
             guard !self.stopped, let listener = self.listener else { return }
             guard self.addressIsAssigned else {
-                self.finish(failure: "当前网络地址已失效。")
+                self.finish(failure: String(localized: "The current network address is no longer available."))
                 return
             }
             switch listener.state {
@@ -63,7 +63,7 @@ final class ProxyServer: @unchecked Sendable {
             case .setup:
                 break
             default:
-                self.finish(failure: "代理监听已停止，请重新开启。")
+                self.finish(failure: String(localized: "The proxy listener has stopped. Start the proxy again."))
             }
         }
     }
@@ -74,7 +74,7 @@ final class ProxyServer: @unchecked Sendable {
         if let interface {
             let scopedAddress = NWEndpoint.Host("\(address)%\(interface)")
             guard addressIsAssigned, scopedAddress.interface?.name == interface else {
-                finish(failure: "当前监听地址已失效。")
+                finish(failure: String(localized: "The selected listening address is no longer available."))
                 return
             }
             listenAddress = scopedAddress
@@ -99,20 +99,20 @@ final class ProxyServer: @unchecked Sendable {
                 switch state {
                 case .ready:
                     guard let port = listener.port else {
-                        self.finish(failure: "无法取得代理端口。")
+                        self.finish(failure: String(localized: "The proxy port could not be determined."))
                         return
                     }
                     self.report(.ready(port.rawValue))
                     self.startTimer()
                 case .failed(let error), .waiting(let error):
-                    self.finish(failure: "代理监听失败（\(error.localizedDescription)）")
+                    self.finish(failure: String(localized: "Proxy listener failed (\(error.localizedDescription))"))
                 default:
                     break
                 }
             }
             listener.start(queue: queue)
         } catch {
-            finish(failure: "代理监听失败（\(error.localizedDescription)）")
+            finish(failure: String(localized: "Proxy listener failed (\(error.localizedDescription))"))
         }
     }
 
@@ -168,7 +168,7 @@ final class ProxyServer: @unchecked Sendable {
     private func tick() {
         guard !stopped else { return }
         guard addressIsAssigned else {
-            finish(failure: "当前网络地址已失效，请重新开启代理。")
+            finish(failure: String(localized: "The current network address is no longer available. Start the proxy again."))
             return
         }
         let now = DispatchTime.now()

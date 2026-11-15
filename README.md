@@ -15,7 +15,7 @@ JustProxy accepts requests from clients configured to use its displayed address 
 - Open the listening address in a browser for a device-aware setup guide, with manual device selection available.
 - Read the in-app privacy explanation from the question mark in the top-right corner.
 
-The app and public support pages currently use Simplified Chinese. Repository documentation is maintained in English.
+The app supports English and Simplified Chinese, following the system or per-app language preference with English as the fallback. The bundled setup guide and public support/privacy pages follow the browser's language preferences and offer a language switch. Repository documentation is maintained in English.
 
 ## Use the proxy
 
@@ -72,9 +72,10 @@ Run the socket-level integration suite on macOS:
 
 ```sh
 python3 Tests/proxy_integration.py
+node Tests/web_language.js
 ```
 
-The suite compiles native Swift/C harnesses and uses loopback sockets to exercise HTTP forwarding, CONNECT tunnels, body framing, the local setup guide, traffic accounting, listener selection, and background-task bookkeeping. Temporary test binaries are created under `build/Tests/`.
+The integration suite compiles native Swift/C harnesses and uses loopback sockets to exercise HTTP forwarding, CONNECT tunnels, body framing, the local setup guide, traffic accounting, listener selection, and background-task bookkeeping. Temporary test binaries are created under `build/Tests/`. The Node.js test checks browser language selection and explicit overrides in the guide and website without third-party dependencies.
 
 These checks do not replace physical-device testing of network reachability, Personal Hotspot, cellular routing, or iOS background suspension.
 
@@ -86,6 +87,7 @@ These checks do not replace physical-device testing of network reachability, Per
 | `JustProxy/Proxy/` | Listener discovery, HTTP parsing, forwarding, and the bundled connection guide |
 | `JustProxy.xcodeproj/` | iOS project and build configuration |
 | `Tests/` | Native harnesses and Python integration tests |
+| `AppStore/metadata/` | Localized App Store names, subtitles, keywords, descriptions, and release notes |
 | `docs/` | Project design and maintenance documentation |
 | `website/` | Public support and privacy pages deployed to GitHub Pages |
 | `.github/workflows/pages.yml` | Website deployment from `master` |

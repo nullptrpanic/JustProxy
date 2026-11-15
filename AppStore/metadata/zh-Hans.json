@@ -1,0 +1,14 @@
+{
+  "locale": "zh-Hans",
+  "appInformation": {
+    "name": "JustProxy",
+    "subtitle": "HTTP代理与实时流量统计",
+    "privacyPolicyUrl": "https://nullptrpanic.github.io/JustProxy/privacy/?lang=zh"
+  },
+  "versionInformation": {
+    "description": "在 iPhone 上开启 HTTP 代理，并查看经代理传输的流量。JustProxy 显示连接地址和端口，方便电脑、手机或支持 HTTP 代理的应用手动配置连接。\n\n应用界面与隐私说明支持简体中文和英文，跟随系统或 App 语言偏好。内置配置说明根据客户端浏览器的语言自动切换，也支持手动选择语言。\n\n主要功能\n• 一键开启或关闭代理，查看并复制连接地址。\n• 自动选择或手动选择当前可用的监听地址。\n• 转发 HTTP 请求，支持 HTTPS CONNECT 隧道。\n• 查看会话上传、下载的累计流量，以及最近连接的目标、端口和流量。\n• 用浏览器打开代理地址，查看适配手机和电脑的配置说明。\n\n如何连接\n1. 将 iPhone 和客户端接入可互通的网络。\n2. 在 JustProxy 中选择监听地址并开启代理。\n3. 在客户端的 HTTP 代理设置中填写显示的地址和端口。\n4. 使用结束后关闭代理，并关闭客户端的手动代理设置。\n\n网络与运行说明\n可以使用可互通的 Wi-Fi 或个人热点网络，热点不是必需条件。客户端需要支持并配置 HTTP 代理；仅开启 JustProxy 不会自动转发其他设备的全部流量。\n\n后台运行受 iOS 系统调度限制，持续使用时建议保持 App 在前台。请仅在信任的网络中向信任的设备提供代理。\n\nHTTPS CONNECT 只转发隧道数据，无需安装证书，不解密 HTTPS 内容。\n\nJustProxy 无需注册或登录。",
+    "keywords": "HTTPS,CONNECT,局域网,WiFi,网络转发,连接记录,上传下载,热点连接,proxy",
+    "supportUrl": "https://nullptrpanic.github.io/JustProxy/?lang=zh",
+    "whatsNew": "新增完整的简体中文和英文支持，覆盖代理状态、流量统计、本地网络权限说明及隐私说明。内置配置指南可跟随浏览器语言自动切换，也支持手动选择语言。"
+  }
+}
